@@ -1,6 +1,10 @@
 package moonshot
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"net/http"
+)
 
 var (
 	ErrorInvalidAuthentication                  = errors.New("鉴权失败请确认")
@@ -8,10 +12,10 @@ var (
 	ErrorRateLimitReachedOrExceededCurrentQuota = errors.New("您超速了。我们设置了最大并发上限和分钟为单位的次数限制。如果在 429 后立即重试，可能会遇到罚时建议控制并发大小，并且在 429 后 sleep 3 秒。或者是Quota 不够了，请联系管理员加量")
 )
 
-var statusCodeToError map[int]error
+var statusCodeErrorMap map[int]error
 
 func init() {
-	statusCodeToError = map[int]error{
+	statusCodeErrorMap = map[int]error{
 		400: ErrorInvalidRequest,
 		401: ErrorInvalidAuthentication,
 		429: ErrorRateLimitReachedOrExceededCurrentQuota,
@@ -19,8 +23,8 @@ func init() {
 }
 
 func StatusCodeToError(code int) error {
-	if err, ok := statusCodeToError[code]; ok {
+	if err, ok := statusCodeErrorMap[code]; ok {
 		return err
 	}
-	return nil
+	return fmt.Errorf("[%d] %s", code, http.StatusText(code))
 }

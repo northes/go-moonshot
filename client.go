@@ -1,12 +1,12 @@
 package moonshot
 
 import (
-	"net/http"
+	"github.com/northes/gox/httpx"
+	"github.com/northes/gox/httpx/httpxutils"
 )
 
 type Client struct {
-	cfg             *Config
-	requestToURLMap map[string]*Httpx
+	cfg *Config
 }
 
 func NewClient(cfg *Config) (*Client, error) {
@@ -15,29 +15,14 @@ func NewClient(cfg *Config) (*Client, error) {
 	}
 
 	c := &Client{
-		cfg:             cfg,
-		requestToURLMap: make(map[string]*Httpx),
-	}
-
-	if err := c.initAPI(); err != nil {
-		return nil, err
+		cfg: cfg,
 	}
 
 	return c, nil
 }
 
-func (c *Client) initAPI() error {
-	err := c.RegisterAPI(new(ChatCompletionsRequest), http.MethodPost)
-	if err != nil {
-		return err
-	}
-	err = c.RegisterAPI(new(ListModelsRequest), http.MethodGet)
-	if err != nil {
-		return err
-	}
-	err = c.RegisterAPI(new(TokenizersEstimateTokenCountRequest), http.MethodPost)
-	if err != nil {
-		return err
-	}
-	return nil
+func (c *Client) newHTTPClient() *httpx.Client {
+	return httpx.NewClient(c.cfg.Host,
+		httpx.WithDebug(c.cfg.Debug),
+	).AddHeader(httpxutils.AuthorizationHeaderKey, httpxutils.ToBearToken(c.cfg.APIKey))
 }

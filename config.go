@@ -8,6 +8,7 @@ import (
 type Config struct {
 	Host   string
 	APIKey string
+	Debug  bool
 }
 
 const DefaultHost = "https://api.moonshot.cn"
@@ -46,5 +47,11 @@ func SetHost(host string) Option {
 func SetAPIKey(key string) Option {
 	return func(c *Config) {
 		c.APIKey = key
+	}
+}
+
+func SetDebugMod() Option {
+	return func(c *Config) {
+		c.Debug = true
 	}
 }
