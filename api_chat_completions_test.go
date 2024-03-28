@@ -6,6 +6,7 @@ import (
 
 	"github.com/northes/go-moonshot"
 	"github.com/northes/go-moonshot/enum"
+	"github.com/northes/gox"
 )
 
 func TestChat(t *testing.T) {
@@ -14,7 +15,7 @@ func TestChat(t *testing.T) {
 		t.Fatal(err)
 	}
 	ctx := context.Background()
-	resp, err := cli.ChatCompletions(ctx, &moonshot.ChatCompletionsRequest{
+	resp, err := cli.Chat().Completions(ctx, &moonshot.ChatCompletionsRequest{
 		Model: enum.ModelMoonshotV18K,
 		Messages: []*moonshot.ChatCompletionsMessage{
 			{
@@ -31,7 +32,7 @@ func TestChat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(moonshot.MarshalToStringX(resp))
+	t.Log(gox.JsonMarshalToStringX(resp))
 	/*
 		{"id":"chatcmpl-dafad118ba6a4d1bb3e10be1734c6213","object":"chat.completion","created":15893254,"model":"moonshot-v1-8k","choices":[{"index":0,"message":{"Role":"assistant","Content":"你好，李雷！1+1等于2。如果你有更复杂的数学问题或者其他问题，也可以随时问我。"},"finish_reason":"stop"}],"usage":{"prompt_tokens":83,"completion_tokens":25,"total_tokens":108}}
 	*/
@@ -69,7 +70,7 @@ func TestChatStream(t *testing.T) {
 		}
 	}()
 
-	err = cli.ChatCompletionsStream(ctx, &moonshot.ChatCompletionsRequest{
+	err = cli.Chat().CompletionsStream(ctx, &moonshot.ChatCompletionsRequest{
 		Model: enum.ModelMoonshotV18K,
 		Messages: []*moonshot.ChatCompletionsMessage{
 			{

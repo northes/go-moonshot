@@ -6,6 +6,7 @@ import (
 
 	"github.com/northes/go-moonshot"
 	"github.com/northes/go-moonshot/enum"
+	"github.com/northes/gox"
 )
 
 func TestTokenizer(t *testing.T) {
@@ -13,7 +14,7 @@ func TestTokenizer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	resp, err := cli.TokenizersEstimateTokenCount(context.Background(), &moonshot.TokenizersEstimateTokenCountRequest{
+	resp, err := cli.Tokenizers().EstimateTokenCount(context.Background(), &moonshot.TokenizersEstimateTokenCountRequest{
 		Model: enum.ModelMoonshotV18K,
 		Messages: []*moonshot.ChatCompletionsMessage{
 			{
@@ -29,5 +30,5 @@ func TestTokenizer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("%+v", moonshot.MarshalToStringX(resp))
+	t.Logf("%+v", gox.JsonMarshalToStringX(resp))
 }

@@ -8,16 +8,20 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 
 	"github.com/northes/go-moonshot/enum"
+	"github.com/northes/gox/httpx"
 )
 
-var (
-	_ IRequest = (*ChatCompletionsRequest)(nil)
-)
+type chat struct {
+	client *httpx.Client
+}
 
-type ChatCompletions struct{}
+func (c *Client) Chat() *chat {
+	return &chat{
+		client: c.newHTTPClient(),
+	}
+}
 
 type ChatCompletionsRequest struct {
 	Messages         []*ChatCompletionsMessage `json:"messages"`
@@ -32,9 +36,13 @@ type ChatCompletionsRequest struct {
 	Stream           bool
 }
 
-type ChatCompletionsMessage struct {
-	Role    enum.ChatCompletionsMessageRole `json:"role"`
-	Content string                          `json:"content"`
+type ChatCompletionsResponse struct {
+	Id      string                            `json:"id"`
+	Object  string                            `json:"object"`
+	Created int                               `json:"created"`
+	Model   string                            `json:"model"`
+	Choices []*ChatCompletionsResponseChoices `json:"choices"`
+	Usage   *ChatCompletionsResponseUsage     `json:"usage"`
 }
 
 type ChatCompletionsResponseChoices struct {
@@ -52,45 +60,31 @@ type ChatCompletionsResponseUsage struct {
 	TotalTokens      int `json:"total_tokens"`
 }
 
-type ChatCompletionsResponse struct {
-	Id      string                            `json:"id"`
-	Object  string                            `json:"object"`
-	Created int                               `json:"created"`
-	Model   string                            `json:"model"`
-	Choices []*ChatCompletionsResponseChoices `json:"choices"`
-	Usage   *ChatCompletionsResponseUsage     `json:"usage"`
+type ChatCompletionsMessage struct {
+	Role    enum.ChatCompletionsMessageRole `json:"role"`
+	Content string                          `json:"content"`
 }
 
-func (c *ChatCompletionsRequest) Path() string {
-	return "/v1/chat/completions"
-}
-
-func (c *Client) ChatCompletions(ctx context.Context, req *ChatCompletionsRequest) (*ChatCompletionsResponse, error) {
+func (c *chat) Completions(ctx context.Context, req *ChatCompletionsRequest) (*ChatCompletionsResponse, error) {
+	const path = "/v1/chat/completions"
 	req.Stream = false
-
-	resp, err := c.Do(ctx, req)
+	chatCompletionsResp := new(ChatCompletionsResponse)
+	resp, err := c.client.AddPath(path).SetBody(req).Post()
+	if err != nil {
+		return chatCompletionsResp, err
+	}
+	if !resp.StatusOK() {
+		return nil, StatusCodeToError(resp.Raw().StatusCode)
+	}
+	err = resp.Unmarshal(chatCompletionsResp)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("error reading response body: %w", err)
-	}
-	if err = StatusCodeToError(resp.StatusCode); err != nil {
-		return nil, fmt.Errorf("bad response from moonshot: %d", resp.StatusCode)
-	}
-
-	var chatResp ChatCompletionsResponse
-	err = json.Unmarshal(body, &chatResp)
-	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling response body: %w", err)
-	}
-	return &chatResp, nil
+	return chatCompletionsResp, nil
 }
 
-func (c *Client) ChatCompletionsStream(ctx context.Context, req *ChatCompletionsRequest, respCh chan<- *ChatCompletionsResponse, done chan<- struct{}) error {
+func (c *chat) CompletionsStream(ctx context.Context, req *ChatCompletionsRequest, respCh chan<- *ChatCompletionsResponse, done chan<- struct{}) error {
+	const path = "/v1/chat/completions"
 
 	if respCh == nil || done == nil {
 		return errors.New("chat completions streaming requests must have a non-nil channel")
@@ -98,17 +92,18 @@ func (c *Client) ChatCompletionsStream(ctx context.Context, req *ChatCompletions
 
 	req.Stream = true
 
-	resp, err := c.Do(ctx, req)
+	resp, err := c.client.AddPath(path).SetBody(req).Post()
 	if err != nil {
-		return fmt.Errorf("error do request: %w", err)
+		return err
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("bad response from moonshot: %d", resp.StatusCode)
+	if !resp.StatusOK() {
+		return StatusCodeToError(resp.Raw().StatusCode)
 	}
+	defer func() {
+		_ = resp.Raw().Body.Close()
+	}()
 
-	reader := bufio.NewReader(resp.Body)
+	reader := bufio.NewReader(resp.Raw().Body)
 	for {
 		line, err := reader.ReadBytes('\n')
 		//fmt.Printf("next line: %v\n", string(line))
