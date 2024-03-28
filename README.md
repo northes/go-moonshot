@@ -1,24 +1,60 @@
 ## Go Moonshot
 
-`Kimi`
+---
 
-- 纯原生库实现
-- 人性化的API，链式操作
-- 高性能缓存池
-- 完全的API支持
+[简体中文](README.md) | **English**
+
+This library provides unofficial Go Clients for [Kimi](https://kimi.moonshot.cn) which created by [MoonshotAI](https://moonshot.cn).
+
+## Feature
+
+- Ergonomic API, chain operation.
+- Full API support.
+- Predefined enumeration.
 
 ## Supported API
 
-| API                     | URL | Done |
-|-------------------------|-----|------|
-| Chat Completion         |     | ✅    |
-| Chat Completion(stream) |     | ✅    |
-| List Models             |     | ✅    |
-| 文件内容抽取                  |     |      |
-| 列出文件                    |     |      |
-| 上传文件                    |     |      |
-| 删除文件                    |     |      |
-| 获取文件信息                  |     |      |
-| 获取文件内容                  |     |      |
-| 计算Token                 |     | ✅    |
+| API                     | Path | Done |
+|-------------------------|------|------|
+| Chat Completion         |      | ✅    |
+| Chat Completion(stream) |      | ✅    |
+| List Models             |      | ✅    |
+| List Files              |      | ✅    |
+| Upload File             |      | ✅    |
+| Delete File             |      | ✅    |
+| Get File Info           |      | ✅    |
+| Get File Contents       |      | ✅    |
+| Estimate Token Count    |      | ✅    |
 
+## Usage
+
+### Initialize client
+
+1. Get a MoonshotAI API Key: [https://platform.moonshot.cn](https://platform.moonshot.cn).
+2. Set up key using a configuration file or environment variable.
+
+> :warning: Note: Your API key is sensitive information. Do not share it with anyone.
+
+```go
+key, ok := os.LookupEnv("moonshot_key")
+if !ok {
+	return nil, errors.New("missing environment variable: moonshot_key")
+}
+return moonshot.NewClient(moonshot.NewConfig(
+	moonshot.SetAPIKey(key),
+))
+```
+
+### Call API
+
+```go
+// List Models
+resp, err := cli.Models().List(context.Background())
+if err != nil {
+	return err
+}
+```
+
+## License
+
+This is open-sourced library licensed under the [Apache license](LICENSE).
