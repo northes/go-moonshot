@@ -13,12 +13,10 @@ type Config struct {
 
 const DefaultHost = "https://api.moonshot.cn"
 
-var ConfigDefault = &Config{
-	Host: DefaultHost,
-}
-
 func newConfigDefault() *Config {
-	return ConfigDefault
+	return &Config{
+		Host: DefaultHost,
+	}
 }
 
 func NewConfig(opts ...Option) *Config {
