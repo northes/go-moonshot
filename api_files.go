@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 
 	"github.com/northes/go-moonshot/enum"
-	"github.com/northes/gox/httpx"
 )
 
 type files struct {
@@ -142,6 +141,29 @@ func (f *files) Delete(fileID string) (*FilesDeleteResponse, error) {
 		return nil, err
 	}
 	return deleteResponse, nil
+}
+
+type FilesDeleteAllResponse struct {
+	RespList []*FilesDeleteResponse `json:"resp_list"`
+}
+
+func (f *files) DeleteAll() (*FilesDeleteAllResponse, error) {
+	listResp, err := f.Lists()
+	if err != nil {
+		return nil, err
+	}
+
+	deleteAllResp := new(FilesDeleteAllResponse)
+
+	for _, data := range listResp.Data {
+		deleteResp, err := f.Delete(data.ID)
+		if err != nil {
+			return nil, err
+		}
+		deleteAllResp.RespList = append(deleteAllResp.RespList, deleteResp)
+	}
+
+	return deleteAllResp, nil
 }
 
 type FilesInfoResponse struct {
