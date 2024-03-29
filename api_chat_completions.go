@@ -10,16 +10,15 @@ import (
 	"io"
 
 	"github.com/northes/go-moonshot/enum"
-	"github.com/northes/gox/httpx"
 )
 
 type chat struct {
-	client *httpx.Client
+	client *Client
 }
 
 func (c *Client) Chat() *chat {
 	return &chat{
-		client: c.newHTTPClient(),
+		client: c,
 	}
 }
 
@@ -65,11 +64,12 @@ type ChatCompletionsMessage struct {
 	Content string                          `json:"content"`
 }
 
+// Completions return the conversation at one time
 func (c *chat) Completions(ctx context.Context, req *ChatCompletionsRequest) (*ChatCompletionsResponse, error) {
 	const path = "/v1/chat/completions"
 	req.Stream = false
 	chatCompletionsResp := new(ChatCompletionsResponse)
-	resp, err := c.client.AddPath(path).SetBody(req).Post()
+	resp, err := c.client.HTTPClient().AddPath(path).SetBody(req).Post()
 	if err != nil {
 		return chatCompletionsResp, err
 	}
@@ -83,6 +83,7 @@ func (c *chat) Completions(ctx context.Context, req *ChatCompletionsRequest) (*C
 	return chatCompletionsResp, nil
 }
 
+// CompletionsStream streaming back conversation content
 func (c *chat) CompletionsStream(ctx context.Context, req *ChatCompletionsRequest, respCh chan<- *ChatCompletionsResponse, done chan<- struct{}) error {
 	const path = "/v1/chat/completions"
 
@@ -92,7 +93,7 @@ func (c *chat) CompletionsStream(ctx context.Context, req *ChatCompletionsReques
 
 	req.Stream = true
 
-	resp, err := c.client.AddPath(path).SetBody(req).Post()
+	resp, err := c.client.HTTPClient().AddPath(path).SetBody(req).Post()
 	if err != nil {
 		return err
 	}
@@ -142,14 +143,17 @@ func (c *chat) CompletionsStream(ctx context.Context, req *ChatCompletionsReques
 	return nil
 }
 
+// IsFinishStop the current session has been generated
 func (i *ChatCompletionsResponseChoices) IsFinishStop() bool {
 	return i.FinishReason == enum.FinishReasonStop
 }
 
+// IsFinishLength the current session has not yet been generated and has been truncated for some reason
 func (i *ChatCompletionsResponseChoices) IsFinishLength() bool {
 	return i.FinishReason == enum.FinishReasonLength
 }
 
+// CanGetContent to determine whether the conversation can be successfully obtained.
 func (c *ChatCompletionsResponse) CanGetContent() bool {
 	for _, choice := range c.Choices {
 		if choice.FinishReason == enum.FinishReasonStop {

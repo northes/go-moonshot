@@ -13,18 +13,26 @@ import (
 )
 
 type files struct {
-	client *httpx.Client
+	client *Client
 }
 
 func (c *Client) Files() *files {
 	return &files{
-		client: c.newHTTPClient(),
+		client: c,
 	}
 }
 
 type FilesUploadRequest struct {
 }
 type FilesUploadResponse struct {
+	ID            string `json:"id"`
+	Object        string `json:"object"`
+	Bytes         int    `json:"bytes"`
+	CreatedAt     int    `json:"created_at"`
+	Filename      string `json:"filename"`
+	Purpose       string `json:"purpose"`
+	Status        string `json:"status"`
+	StatusDetails string `json:"status_details"`
 }
 
 func (f *files) Upload(filePath string) (*FilesUploadResponse, error) {
@@ -59,9 +67,13 @@ func (f *files) Upload(filePath string) (*FilesUploadResponse, error) {
 		return nil, err
 	}
 
-	resp, err := f.client.AddPath(path).SetBody(body).SetContentType(writer.FormDataContentType()).Post()
+	resp, err := f.client.HTTPClient().AddPath(path).SetBody(body).SetContentType(writer.FormDataContentType()).Post()
 	if err != nil {
 		return nil, err
+	}
+
+	if !resp.StatusOK() {
+		return nil, StatusCodeToError(resp.Raw().StatusCode)
 	}
 
 	uploadResponse := new(FilesUploadResponse)
@@ -76,8 +88,8 @@ func (f *files) Upload(filePath string) (*FilesUploadResponse, error) {
 type FilesListRequest struct {
 }
 type FilesListResponse struct {
-	Object string                  `json:"object"`
-	Data   []FilesListResponseData `json:"data"`
+	Object string                   `json:"object"`
+	Data   []*FilesListResponseData `json:"data"`
 }
 type FilesListResponseData struct {
 	ID           string            `json:"id"`
@@ -92,9 +104,12 @@ type FilesListResponseData struct {
 
 func (f *files) Lists() (*FilesListResponse, error) {
 	const path = "/v1/files"
-	resp, err := f.client.AddPath(path).Get()
+	resp, err := f.client.HTTPClient().AddPath(path).Get()
 	if err != nil {
 		return nil, err
+	}
+	if !resp.StatusOK() {
+		return nil, StatusCodeToError(resp.Raw().StatusCode)
 	}
 	listResponse := new(FilesListResponse)
 	err = resp.Unmarshal(listResponse)
@@ -105,17 +120,21 @@ func (f *files) Lists() (*FilesListResponse, error) {
 }
 
 type FilesDeleteResponse struct {
+	CommonAPIResponse
 	Deleted bool   `json:"deleted"`
-	Id      string `json:"id"`
+	ID      string `json:"id"`
 	Object  string `json:"object"`
 }
 
 func (f *files) Delete(fileID string) (*FilesDeleteResponse, error) {
 	const path = "/v1/files/%s"
 	fullPath := fmt.Sprintf(path, fileID)
-	resp, err := f.client.AddPath(fullPath).Delete()
+	resp, err := f.client.HTTPClient().AddPath(fullPath).Delete()
 	if err != nil {
 		return nil, err
+	}
+	if !resp.StatusOK() {
+		return nil, StatusCodeToError(resp.Raw().StatusCode)
 	}
 	deleteResponse := new(FilesDeleteResponse)
 	err = resp.Unmarshal(deleteResponse)
@@ -139,9 +158,12 @@ type FilesInfoResponse struct {
 func (f *files) Info(fileID string) (*FilesInfoResponse, error) {
 	const path = "/v1/files/%s"
 	fullPath := fmt.Sprintf(path, fileID)
-	resp, err := f.client.AddPath(fullPath).Get()
+	resp, err := f.client.HTTPClient().AddPath(fullPath).Get()
 	if err != nil {
 		return nil, err
+	}
+	if !resp.StatusOK() {
+		return nil, StatusCodeToError(resp.Raw().StatusCode)
 	}
 	infoResponse := new(FilesInfoResponse)
 	err = resp.Unmarshal(infoResponse)
@@ -162,9 +184,12 @@ type FileContentResponse struct {
 func (f *files) Content(fileID string) (*FileContentResponse, error) {
 	const path = "/v1/files/%s/content"
 	fullPath := fmt.Sprintf(path, fileID)
-	resp, err := f.client.AddPath(fullPath).Get()
+	resp, err := f.client.HTTPClient().AddPath(fullPath).Get()
 	if err != nil {
 		return nil, err
+	}
+	if !resp.StatusOK() {
+		return nil, StatusCodeToError(resp.Raw().StatusCode)
 	}
 	contentResponse := new(FileContentResponse)
 	err = resp.Unmarshal(contentResponse)

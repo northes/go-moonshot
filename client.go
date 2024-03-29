@@ -25,7 +25,7 @@ func NewClient(cfg *Config) (*Client, error) {
 	return c, nil
 }
 
-func (c *Client) newHTTPClient() *httpx.Client {
+func (c *Client) HTTPClient() *httpx.Client {
 	return httpx.NewClient(c.cfg.Host,
 		httpx.WithDebug(c.cfg.Debug),
 	).AddHeader(httpxutils.AuthorizationHeaderKey, httpxutils.ToBearToken(c.cfg.APIKey))

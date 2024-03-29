@@ -2,17 +2,15 @@ package moonshot
 
 import (
 	"context"
-
-	"github.com/northes/gox/httpx"
 )
 
 type models struct {
-	client *httpx.Client
+	client *Client
 }
 
 func (c *Client) Models() *models {
 	return &models{
-		client: c.newHTTPClient(),
+		client: c,
 	}
 }
 
@@ -52,14 +50,14 @@ type ListModelsResponseDataPermission struct {
 
 func (m *models) List(ctx context.Context) (*ListModelsResponse, error) {
 	const path = "/v1/models"
-	listModelResp := new(ListModelsResponse)
-	resp, err := m.client.AddPath(path).Get()
+	resp, err := m.client.HTTPClient().AddPath(path).Get()
 	if err != nil {
 		return nil, err
 	}
 	if !resp.StatusOK() {
 		return nil, StatusCodeToError(resp.Raw().StatusCode)
 	}
+	listModelResp := new(ListModelsResponse)
 	err = resp.Unmarshal(listModelResp)
 	if err != nil {
 		return nil, err

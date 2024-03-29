@@ -16,10 +16,12 @@ func NewTestClient() (*moonshot.Client, error) {
 	}
 	return moonshot.NewClient(moonshot.NewConfig(
 		moonshot.SetAPIKey(key),
+		moonshot.SetDebugMod(),
+		moonshot.SetHost(moonshot.DefaultHost),
 	))
 }
 
-func TestConfig(t *testing.T) {
+func TestNewClient(t *testing.T) {
 	tt := require.New(t)
 
 	_, err := moonshot.NewClient(nil)

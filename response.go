@@ -12,10 +12,10 @@ type CommonResponse struct {
 }
 
 type CommonAPIResponse struct {
-	Error *CommonAPIResponseError `json:"error"`
+	Error *CommonAPIResponseError `json:"error,omitempty"`
 }
 
 type CommonAPIResponseError struct {
-	Message string `json:"message"`
-	Type    string `json:"type"`
+	Message string `json:"message,omitempty"`
+	Type    string `json:"type,omitempty"`
 }

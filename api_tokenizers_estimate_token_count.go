@@ -4,16 +4,15 @@ import (
 	"context"
 
 	"github.com/northes/go-moonshot/enum"
-	"github.com/northes/gox/httpx"
 )
 
 type tokenizersEstimateTokenCount struct {
-	client *httpx.Client
+	client *Client
 }
 
 func (c *Client) Tokenizers() *tokenizersEstimateTokenCount {
 	return &tokenizersEstimateTokenCount{
-		client: c.newHTTPClient(),
+		client: c,
 	}
 }
 
@@ -34,7 +33,7 @@ type TokenizersEstimateTokenCountResponseData struct {
 func (t *tokenizersEstimateTokenCount) EstimateTokenCount(ctx context.Context, req *TokenizersEstimateTokenCountRequest) (*TokenizersEstimateTokenCountResponse, error) {
 	const path = "/v1/tokenizers/estimate-token-count"
 	estimateTokenCountResp := new(TokenizersEstimateTokenCountResponse)
-	resp, err := t.client.AddPath(path).SetBody(req).Post()
+	resp, err := t.client.HTTPClient().AddPath(path).SetBody(req).Post()
 	if err != nil {
 		return nil, err
 	}
