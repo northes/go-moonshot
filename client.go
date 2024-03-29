@@ -10,6 +10,10 @@ type Client struct {
 }
 
 func NewClient(cfg *Config) (*Client, error) {
+	if cfg == nil {
+		cfg = newConfigDefault()
+	}
+
 	if err := cfg.PreCheck(); err != nil {
 		return nil, err
 	}
