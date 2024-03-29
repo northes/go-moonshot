@@ -1,6 +1,6 @@
 ## Go Moonshot
 
-**简体中文** | [English](README_en.md)
+**简体中文** | [English](README.md)
 
 This library provides unofficial Go Clients for [Kimi](https://kimi.moonshot.cn) which created by [MoonshotAI](https://moonshot.cn).
 

@@ -1,4 +1,4 @@
 .idea
 .vscode
 go.work
-coverage.tet
+coverage.txt
