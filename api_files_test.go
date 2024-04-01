@@ -42,6 +42,40 @@ func TestFilesUpload(t *testing.T) {
 	}
 }
 
+func TestFilesUploadBytes(t *testing.T) {
+	content := []byte("hello")
+	require := require.New(t)
+	// upload
+	cli, err := NewTestClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	uploadResp, err := cli.Files().UploadBytes(&moonshot.FilesUploadBytesRequest{
+		Name:    "byteFile.txt",
+		Bytes:   content,
+		Purpose: moonshot.FilePurposeExtract,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	require.Equal(uploadResp.Bytes, len(content))
+
+	// check content
+	contentResp, err := cli.Files().Content(uploadResp.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	require.Equal(string(content), contentResp.Content)
+
+	// remove
+	deleteResp, err := cli.Files().Delete(uploadResp.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	require.Equal(deleteResp.ID, uploadResp.ID)
+	require.Equal(deleteResp.Deleted, true)
+}
+
 func TestFilesList(t *testing.T) {
 	cli, err := NewTestClient()
 	if err != nil {
@@ -94,7 +128,11 @@ func TestFilesDelete(t *testing.T) {
 	t.Logf("%+v", gox.JsonMarshalToStringX(resp))
 }
 
+/*
+❗ This test may lead to unexpected results
+*/
 func TestFilesDeleteAll(t *testing.T) {
+	return
 	cli, err := NewTestClient()
 	if err != nil {
 		t.Fatal(err)

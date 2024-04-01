@@ -7,8 +7,6 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
-
-	"github.com/northes/go-moonshot/enum"
 )
 
 type files struct {
@@ -22,6 +20,9 @@ func (c *Client) Files() *files {
 }
 
 type FilesUploadRequest struct {
+	Name    string
+	Path    string
+	Purpose FilesPurpose
 }
 type FilesUploadResponse struct {
 	ID            string `json:"id"`
@@ -56,7 +57,7 @@ func (f *files) Upload(filePath string) (*FilesUploadResponse, error) {
 		return nil, err
 	}
 
-	err = writer.WriteField("purpose ", enum.FilePurposeExtract.String())
+	err = writer.WriteField("purpose ", FilePurposeExtract.String())
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +67,11 @@ func (f *files) Upload(filePath string) (*FilesUploadResponse, error) {
 		return nil, err
 	}
 
-	resp, err := f.client.HTTPClient().AddPath(path).SetBody(body).SetContentType(writer.FormDataContentType()).Post()
+	resp, err := f.client.HTTPClient().
+		AddPath(path).
+		SetBody(body).
+		SetContentType(writer.FormDataContentType()).
+		Post()
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +89,68 @@ func (f *files) Upload(filePath string) (*FilesUploadResponse, error) {
 	return uploadResponse, nil
 }
 
+type FilesUploadBytesRequest struct {
+	Name    string
+	Bytes   []byte
+	Purpose FilesPurpose
+}
+type FilesUploadBytesResponse struct {
+	ID            string `json:"id"`
+	Object        string `json:"object"`
+	Bytes         int    `json:"bytes"`
+	CreatedAt     int    `json:"created_at"`
+	Filename      string `json:"filename"`
+	Purpose       string `json:"purpose"`
+	Status        string `json:"status"`
+	StatusDetails string `json:"status_details"`
+}
+
+func (f *files) UploadBytes(req *FilesUploadBytesRequest) (*FilesUploadBytesResponse, error) {
+	const path = "/v1/files"
+
+	var b bytes.Buffer
+	reader := bytes.NewReader(req.Bytes)
+
+	builder := multipart.NewWriter(&b)
+	err := builder.WriteField("purpose ", FilePurposeExtract.String())
+	if err != nil {
+		return nil, err
+	}
+	fileFieldWriter, err := builder.CreateFormFile("file", req.Name)
+	if err != nil {
+		return nil, err
+	}
+	_, err = io.Copy(fileFieldWriter, reader)
+	if err != nil {
+		return nil, err
+	}
+	err = builder.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := f.client.HTTPClient().
+		AddPath(path).
+		SetBody(&b).
+		SetContentType(builder.FormDataContentType()).
+		Post()
+	if err != nil {
+		return nil, err
+	}
+
+	if !resp.StatusOK() {
+		return nil, StatusCodeToError(resp.Raw().StatusCode)
+	}
+
+	uploadResponse := new(FilesUploadBytesResponse)
+	err = resp.Unmarshal(uploadResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return uploadResponse, nil
+}
+
 type FilesListRequest struct {
 }
 type FilesListResponse struct {
@@ -91,14 +158,14 @@ type FilesListResponse struct {
 	Data   []*FilesListResponseData `json:"data"`
 }
 type FilesListResponseData struct {
-	ID           string            `json:"id"`
-	Object       string            `json:"object"`
-	Bytes        int64             `json:"bytes"`
-	CreatedAt    int64             `json:"created_at"`
-	Filename     string            `json:"filename"`
-	Purpose      enum.FilesPurpose `json:"purpose"`
-	Status       string            `json:"status"`
-	StatusDetail string            `json:"status_detail"`
+	ID           string       `json:"id"`
+	Object       string       `json:"object"`
+	Bytes        int64        `json:"bytes"`
+	CreatedAt    int64        `json:"created_at"`
+	Filename     string       `json:"filename"`
+	Purpose      FilesPurpose `json:"purpose"`
+	Status       string       `json:"status"`
+	StatusDetail string       `json:"status_detail"`
 }
 
 func (f *files) Lists() (*FilesListResponse, error) {
