@@ -10,6 +10,8 @@ github.com/northes/gox v0.0.0-20240329023748-c25df9a30b29 h1:7TBHOoOj2vbDdaqlRgv
 github.com/northes/gox v0.0.0-20240329023748-c25df9a30b29/go.mod h1:bRa8kdIcTKEd5P87WSLUKegJ4662PkR5JDQz0rv3xsc=
 github.com/northes/gox v0.0.0-20240329040732-698237853d5c h1:Y5Fb5rgUQmqkFd5Sm54Qd1aQX9/ORcq8duz8fBV1NPE=
 github.com/northes/gox v0.0.0-20240329040732-698237853d5c/go.mod h1:bRa8kdIcTKEd5P87WSLUKegJ4662PkR5JDQz0rv3xsc=
+github.com/northes/gox v0.1.0 h1:49e2c/LVHnpeEkVrkFNpMHzURcv2XjUQjfHPFOGfL6M=
+github.com/northes/gox v0.1.0/go.mod h1:bRa8kdIcTKEd5P87WSLUKegJ4662PkR5JDQz0rv3xsc=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=

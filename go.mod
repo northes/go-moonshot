@@ -3,7 +3,7 @@ module github.com/northes/go-moonshot
 go 1.22.1
 
 require (
-	github.com/northes/gox v0.0.0-20240329040732-698237853d5c
+	github.com/northes/gox v0.1.0
 	github.com/stretchr/testify v1.9.0
 )
 
