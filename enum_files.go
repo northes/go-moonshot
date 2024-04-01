@@ -1,4 +1,4 @@
-package enum
+package moonshot
 
 type FilesPurpose string
 
