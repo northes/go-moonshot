@@ -2,8 +2,6 @@ package moonshot
 
 import (
 	"context"
-
-	"github.com/northes/go-moonshot/enum"
 )
 
 type tokenizersEstimateTokenCount struct {
@@ -17,8 +15,8 @@ func (c *Client) Tokenizers() *tokenizersEstimateTokenCount {
 }
 
 type TokenizersEstimateTokenCountRequest struct {
-	Model    enum.ChatCompletionsModelID `json:"model"`
-	Messages []*ChatCompletionsMessage   `json:"messages"`
+	Model    ChatCompletionsModelID    `json:"model"`
+	Messages []*ChatCompletionsMessage `json:"messages"`
 }
 
 type TokenizersEstimateTokenCountResponse struct {

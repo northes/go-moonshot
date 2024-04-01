@@ -8,8 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-
-	"github.com/northes/go-moonshot/enum"
 )
 
 type chat struct {
@@ -24,7 +22,7 @@ func (c *Client) Chat() *chat {
 
 type ChatCompletionsRequest struct {
 	Messages         []*ChatCompletionsMessage `json:"messages"`
-	Model            enum.ChatCompletionsModelID
+	Model            ChatCompletionsModelID
 	MaxTokens        int64
 	Temperature      float64
 	TopP             float64
@@ -50,7 +48,7 @@ type ChatCompletionsResponseChoices struct {
 	Message *ChatCompletionsMessage `json:"message,omitempty"`
 	Delta   *ChatCompletionsMessage `json:"delta,omitempty"`
 
-	FinishReason enum.ChatCompletionsFinishReason `json:"finish_reason"`
+	FinishReason ChatCompletionsFinishReason `json:"finish_reason"`
 }
 
 type ChatCompletionsResponseUsage struct {
@@ -60,8 +58,8 @@ type ChatCompletionsResponseUsage struct {
 }
 
 type ChatCompletionsMessage struct {
-	Role    enum.ChatCompletionsMessageRole `json:"role"`
-	Content string                          `json:"content"`
+	Role    ChatCompletionsMessageRole `json:"role"`
+	Content string                     `json:"content"`
 }
 
 // Completions return the conversation at one time
@@ -145,18 +143,18 @@ func (c *chat) CompletionsStream(ctx context.Context, req *ChatCompletionsReques
 
 // IsFinishStop the current session has been generated
 func (i *ChatCompletionsResponseChoices) IsFinishStop() bool {
-	return i.FinishReason == enum.FinishReasonStop
+	return i.FinishReason == FinishReasonStop
 }
 
 // IsFinishLength the current session has not yet been generated and has been truncated for some reason
 func (i *ChatCompletionsResponseChoices) IsFinishLength() bool {
-	return i.FinishReason == enum.FinishReasonLength
+	return i.FinishReason == FinishReasonLength
 }
 
 // CanGetContent to determine whether the conversation can be successfully obtained.
 func (c *ChatCompletionsResponse) CanGetContent() bool {
 	for _, choice := range c.Choices {
-		if choice.FinishReason == enum.FinishReasonStop {
+		if choice.FinishReason == FinishReasonStop {
 			return false
 		}
 		if choice.Message != nil {
