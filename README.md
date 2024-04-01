@@ -8,7 +8,8 @@
 
 [简体中文](README_zh.md) | **English**
 
-This library provides unofficial Go Clients for [Kimi](https://kimi.moonshot.cn) which created by [MoonshotAI](https://moonshot.cn).
+A Go SDK for [Kimi](https://kimi.moonshot.cn) which created
+by [MoonshotAI](https://moonshot.cn).
 
 ## Feature
 
@@ -18,17 +19,17 @@ This library provides unofficial Go Clients for [Kimi](https://kimi.moonshot.cn)
 
 ## Supported API
 
-| API                     | Path | Done |
-|-------------------------|------|------|
-| Chat Completion         |      | ✅    |
-| Chat Completion(stream) |      | ✅    |
-| List Models             |      | ✅    |
-| List Files              |      | ✅    |
-| Upload File             |      | ✅    |
-| Delete File             |      | ✅    |
-| Get File Info           |      | ✅    |
-| Get File Contents       |      | ✅    |
-| Estimate Token Count    |      | ✅    |
+| API                     | Done |
+|-------------------------|------|
+| Chat Completion         | ✅    |
+| Chat Completion(stream) | ✅    |
+| List Models             | ✅    |
+| List Files              | ✅    |
+| Upload File             | ✅    |
+| Delete File             | ✅    |
+| Get File Info           | ✅    |
+| Get File Contents       | ✅    |
+| Estimate Token Count    | ✅    |
 
 ## Usage
 
@@ -42,10 +43,10 @@ This library provides unofficial Go Clients for [Kimi](https://kimi.moonshot.cn)
 ```go
 key, ok := os.LookupEnv("moonshot_key")
 if !ok {
-	return nil, errors.New("missing environment variable: moonshot_key")
+return nil, errors.New("missing environment variable: moonshot_key")
 }
 return moonshot.NewClient(moonshot.NewConfig(
-	moonshot.SetAPIKey(key),
+moonshot.SetAPIKey(key),
 ))
 ```
 
@@ -55,12 +56,12 @@ return moonshot.NewClient(moonshot.NewConfig(
 // List Models
 resp, err := cli.Models().List(context.Background())
 if err != nil {
-	return err
+return err
 }
 ```
 
 ## License
 
-This is open-sourced library licensed under the [Apache license](LICENSE).
+This is open-sourced library licensed under the [MIT license](LICENSE).
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fnorthes%2Fgo-moonshot.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fnorthes%2Fgo-moonshot?ref=badge_large&issueType=license)
