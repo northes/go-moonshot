@@ -6,6 +6,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dustin/go-humanize v1.0.1 h1:GzkhY7T5VNhEkwH0PVJgjz+fX1rhBrR7pRT3mDkpeCY=
 github.com/dustin/go-humanize v1.0.1/go.mod h1:Mu1zIs6XwVuF/gI1OepvI0qD18qycQx+mFykh5fBlto=
+github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
+github.com/joho/godotenv v1.5.1/go.mod h1:f4LDr5Voq0i2e/R5DDNOoa2zzDfwtkZa6DnEwAbqwq4=
 github.com/northes/gox v0.0.0-20240329023748-c25df9a30b29 h1:7TBHOoOj2vbDdaqlRgvZi72OKMiXCj+kW73PFEh3w0g=
 github.com/northes/gox v0.0.0-20240329023748-c25df9a30b29/go.mod h1:bRa8kdIcTKEd5P87WSLUKegJ4662PkR5JDQz0rv3xsc=
 github.com/northes/gox v0.0.0-20240329040732-698237853d5c h1:Y5Fb5rgUQmqkFd5Sm54Qd1aQX9/ORcq8duz8fBV1NPE=

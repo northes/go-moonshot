@@ -2,3 +2,4 @@
 .vscode
 go.work
 coverage.txt
+.env
