@@ -34,28 +34,82 @@
 
 ### 初始化
 
-1. Get a MoonshotAI API Key: [https://platform.moonshot.cn](https://platform.moonshot.cn).
-2. Set up key using a configuration file or environment variable.
+1. 申请一个 MoonshotAI API Key: [https://platform.moonshot.cn](https://platform.moonshot.cn)
+2. 使用配置文件或环境变量设置密钥
 
-> :warning: Note: Your API key is sensitive information. Do not share it with anyone.
+> :warning: 注意：您的API密钥是敏感信息。
+不要和任何人分享。
+
+#### 仅使用Key
 
 ```go
-key, ok := os.LookupEnv("moonshot_key")
+key, ok := os.LookupEnv("MOONSHOT_KEY")
 if !ok {
-return nil, errors.New("missing environment variable: moonshot_key")
+    return errors.New("missing environment variable: moonshot_key")
 }
-return moonshot.NewClient(moonshot.NewConfig(
-moonshot.SetAPIKey(key),
-))
+
+cli, err := moonshot.NewClient(key)
+if err != nil {
+    return err
+}
+```
+
+#### 使用配置
+
+```go
+key, ok := os.LookupEnv("MOONSHOT_KEY")
+if !ok {
+    return errors.New("missing environment variable: moonshot_key")
+}
+
+cli, err := moonshot.NewClientWithConfig(
+    moonshot.NewConfig(
+        moonshot.WithAPIKey("xxxx"),
+    ),
+)
 ```
 
 ### 调用 API
 
 ```go
-// List Models
+// 列出可用模型
 resp, err := cli.Models().List(context.Background())
 if err != nil {
-return err
+    return err
+}
+```
+
+```go
+// Chat completions(stream)
+resp, err := cli.Chat().CompletionsStream(context.Background(), &moonshot.ChatCompletionsRequest{
+    Model: moonshot.ModelMoonshotV18K,
+    Messages: []*moonshot.ChatCompletionsMessage{
+        {
+            Role:    moonshot.RoleUser,
+            Content: "你好，我叫李雷，1+1等于多少？",
+        },
+    },
+    Temperature: 0.3,
+    Stream:      true,
+})
+if err != nil {
+    return err
+}
+
+for receive := range resp.Receive() {
+    msg, err := receive.GetMessage()
+    if err != nil {
+        if errors.Is(err, io.EOF) {
+            break
+        }
+        break
+    }
+    switch msg.Role {
+        case moonshot.RoleSystem,moonshot.RoleUser,moonshot.RoleAssistant:
+        // do something...
+        default:
+        // do something...
+    }
 }
 ```
 

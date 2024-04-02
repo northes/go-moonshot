@@ -40,14 +40,33 @@ by [MoonshotAI](https://moonshot.cn).
 
 > :warning: Note: Your API key is sensitive information. Do not share it with anyone.
 
+#### With Only Key
+
 ```go
-key, ok := os.LookupEnv("moonshot_key")
+key, ok := os.LookupEnv("MOONSHOT_KEY")
 if !ok {
-return nil, errors.New("missing environment variable: moonshot_key")
+    return errors.New("missing environment variable: moonshot_key")
 }
-return moonshot.NewClient(moonshot.NewConfig(
-moonshot.SetAPIKey(key),
-))
+
+cli, err := moonshot.NewClient(key)
+if err != nil {
+    return err
+}
+```
+
+#### With Config
+
+```go
+key, ok := os.LookupEnv("MOONSHOT_KEY")
+if !ok {
+    return errors.New("missing environment variable: moonshot_key")
+}
+
+cli, err := moonshot.NewClientWithConfig(
+    moonshot.NewConfig(
+        moonshot.WithAPIKey("xxxx"),
+    ),
+)
 ```
 
 ### Call API
@@ -56,7 +75,41 @@ moonshot.SetAPIKey(key),
 // List Models
 resp, err := cli.Models().List(context.Background())
 if err != nil {
-return err
+    return err
+}
+```
+
+```go
+// Chat completions(stream)
+resp, err := cli.Chat().CompletionsStream(context.Background(), &moonshot.ChatCompletionsRequest{
+    Model: moonshot.ModelMoonshotV18K,
+    Messages: []*moonshot.ChatCompletionsMessage{
+        {
+            Role:    moonshot.RoleUser,
+            Content: "你好，我叫李雷，1+1等于多少？",
+        },
+    },
+    Temperature: 0.3,
+    Stream:      true,
+})
+if err != nil {
+    return err
+}
+
+for receive := range resp.Receive() {
+    msg, err := receive.GetMessage()
+    if err != nil {
+        if errors.Is(err, io.EOF) {
+            break
+        }
+        break
+    }
+    switch msg.Role {
+        case moonshot.RoleSystem,moonshot.RoleUser,moonshot.RoleAssistant:
+        // do something...
+        default:
+        // do something...
+    }
 }
 ```
 
