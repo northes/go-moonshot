@@ -3,10 +3,9 @@ package moonshot
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"mime/multipart"
 	"os"
-	"path/filepath"
+
+	utils "github.com/northes/go-moonshot/internal"
 )
 
 type files struct {
@@ -35,42 +34,36 @@ type FilesUploadResponse struct {
 	StatusDetails string `json:"status_details"`
 }
 
-func (f *files) Upload(filePath string) (*FilesUploadResponse, error) {
+func (f *files) Upload(req *FilesUploadRequest) (*FilesUploadResponse, error) {
 	const path = "/v1/files"
 
-	file, err := os.Open(filePath)
+	var b bytes.Buffer
+
+	builder := utils.NewFormBuilder(&b)
+	err := builder.WriteField("purpose", FilePurposeExtract.String())
+	if err != nil {
+		return nil, err
+	}
+	fileData, err := os.Open(req.Path)
 	if err != nil {
 		return nil, err
 	}
 	defer func(file *os.File) {
 		_ = file.Close()
-	}(file)
-
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	fileField, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
+	}(fileData)
+	err = builder.CreateFormFile("file", fileData)
 	if err != nil {
 		return nil, err
 	}
-	_, err = io.Copy(fileField, file)
-	if err != nil {
-		return nil, err
-	}
-
-	err = writer.WriteField("purpose ", FilePurposeExtract.String())
-	if err != nil {
-		return nil, err
-	}
-
-	err = writer.Close()
+	err = builder.Close()
 	if err != nil {
 		return nil, err
 	}
 
 	resp, err := f.client.HTTPClient().
 		AddPath(path).
-		SetBody(body).
-		SetContentType(writer.FormDataContentType()).
+		SetBody(&b).
+		SetContentType(builder.FormDataContentType()).
 		Post()
 	if err != nil {
 		return nil, err
@@ -111,16 +104,12 @@ func (f *files) UploadBytes(req *FilesUploadBytesRequest) (*FilesUploadBytesResp
 	var b bytes.Buffer
 	reader := bytes.NewReader(req.Bytes)
 
-	builder := multipart.NewWriter(&b)
+	builder := utils.NewFormBuilder(&b)
 	err := builder.WriteField("purpose ", FilePurposeExtract.String())
 	if err != nil {
 		return nil, err
 	}
-	fileFieldWriter, err := builder.CreateFormFile("file", req.Name)
-	if err != nil {
-		return nil, err
-	}
-	_, err = io.Copy(fileFieldWriter, reader)
+	err = builder.CreateFormFileReader("file", reader, req.Name)
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,7 @@ package moonshot_test
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/northes/go-moonshot"
@@ -30,7 +31,11 @@ func TestFilesUpload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	resp, err := cli.Files().Upload(filePath)
+	resp, err := cli.Files().Upload(&moonshot.FilesUploadRequest{
+		Name:    filepath.Base(filePath),
+		Path:    filePath,
+		Purpose: moonshot.FilePurposeExtract,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -132,7 +137,7 @@ func TestFilesDelete(t *testing.T) {
 ❗ This test may lead to unexpected results
 */
 func TestFilesDeleteAll(t *testing.T) {
-	return
+
 	cli, err := NewTestClient()
 	if err != nil {
 		t.Fatal(err)
@@ -140,7 +145,11 @@ func TestFilesDeleteAll(t *testing.T) {
 
 	for range 10 {
 		fp, _ := test.GenerateTestFile(test.GenerateTestContent())
-		_, _ = cli.Files().Upload(fp)
+		_, _ = cli.Files().Upload(&moonshot.FilesUploadRequest{
+			Name:    filepath.Base(fp),
+			Path:    fp,
+			Purpose: moonshot.FilePurposeExtract,
+		})
 	}
 
 	listResp, err := cli.Files().Lists()
@@ -164,4 +173,11 @@ func TestFilesDeleteAll(t *testing.T) {
 		}
 		return
 	}(deleteAllResp.RespList), "must delete all files")
+
+	t.Logf("Deleted Files ID List: %v", func(ls []*moonshot.FilesDeleteResponse) (l []string) {
+		for _, v := range ls {
+			l = append(l, v.ID)
+		}
+		return l
+	}(deleteAllResp.RespList))
 }
