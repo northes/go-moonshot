@@ -5,9 +5,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
+
+	"github.com/northes/gox/httpx"
 )
 
 type chat struct {
@@ -20,17 +21,22 @@ func (c *Client) Chat() *chat {
 	}
 }
 
+type ChatCompletionsMessage struct {
+	Role    ChatCompletionsMessageRole `json:"role"`
+	Content string                     `json:"content"`
+}
+
 type ChatCompletionsRequest struct {
 	Messages         []*ChatCompletionsMessage `json:"messages"`
-	Model            ChatCompletionsModelID
-	MaxTokens        int64
-	Temperature      float64
-	TopP             float64
-	N                int64
-	PresencePenalty  float64
-	FrequencyPenalty float64
-	Stop             []string
-	Stream           bool
+	Model            ChatCompletionsModelID    `json:"model"`
+	MaxTokens        int64                     `json:"max_tokens"`
+	Temperature      float64                   `json:"temperature"`
+	TopP             float64                   `json:"top_p"`
+	N                int64                     `json:"n"`
+	PresencePenalty  float64                   `json:"presence_penalty"`
+	FrequencyPenalty float64                   `json:"frequency_penalty"`
+	Stop             []string                  `json:"stop"`
+	Stream           bool                      `json:"stream"`
 }
 
 type ChatCompletionsResponse struct {
@@ -45,8 +51,10 @@ type ChatCompletionsResponse struct {
 type ChatCompletionsResponseChoices struct {
 	Index int `json:"index"`
 
+	// return with no stream
 	Message *ChatCompletionsMessage `json:"message,omitempty"`
-	Delta   *ChatCompletionsMessage `json:"delta,omitempty"`
+	// return With stream
+	Delta *ChatCompletionsMessage `json:"delta,omitempty"`
 
 	FinishReason ChatCompletionsFinishReason `json:"finish_reason"`
 }
@@ -55,11 +63,6 @@ type ChatCompletionsResponseUsage struct {
 	PromptTokens     int `json:"prompt_tokens"`
 	CompletionTokens int `json:"completion_tokens"`
 	TotalTokens      int `json:"total_tokens"`
-}
-
-type ChatCompletionsMessage struct {
-	Role    ChatCompletionsMessageRole `json:"role"`
-	Content string                     `json:"content"`
 }
 
 // Completions return the conversation at one time
@@ -81,92 +84,122 @@ func (c *chat) Completions(ctx context.Context, req *ChatCompletionsRequest) (*C
 	return chatCompletionsResp, nil
 }
 
-// CompletionsStream streaming back conversation content
-func (c *chat) CompletionsStream(ctx context.Context, req *ChatCompletionsRequest, respCh chan<- *ChatCompletionsResponse, done chan<- struct{}) error {
-	const path = "/v1/chat/completions"
+type ChatCompletionsStreamResponse struct {
+	resp       *httpx.Response
+	isFinished bool
+}
 
-	if respCh == nil || done == nil {
-		return errors.New("chat completions streaming requests must have a non-nil channel")
-	}
+type ChatCompletionsStreamResponseReceive struct {
+	ChatCompletionsResponse
+	isFinished bool
+	err        error
+}
+
+// CompletionsStream streaming back conversation content
+func (c *chat) CompletionsStream(ctx context.Context, req *ChatCompletionsRequest) (*ChatCompletionsStreamResponse, error) {
+	const path = "/v1/chat/completions"
 
 	req.Stream = true
 
 	resp, err := c.client.HTTPClient().AddPath(path).SetBody(req).Post()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if !resp.StatusOK() {
-		return StatusCodeToError(resp.Raw().StatusCode)
+		return nil, StatusCodeToError(resp.Raw().StatusCode)
 	}
-	defer func() {
-		_ = resp.Raw().Body.Close()
-	}()
 
-	reader := bufio.NewReader(resp.Raw().Body)
-	for {
-		line, err := reader.ReadBytes('\n')
-		//fmt.Printf("next line: %v\n", string(line))
-		if err != nil {
-			if err == io.EOF {
+	streamResp := new(ChatCompletionsStreamResponse)
+	streamResp.resp = resp
+	return streamResp, nil
+}
+
+func (c *ChatCompletionsStreamResponse) Next() <-chan *ChatCompletionsStreamResponseReceive {
+	revCh := make(chan *ChatCompletionsStreamResponseReceive, 1)
+	reader := bufio.NewReader(c.resp.Raw().Body)
+
+	go func() {
+		defer func() {
+			close(revCh)
+			_ = c.resp.Raw().Body.Close()
+		}()
+		for {
+			line, err := reader.ReadBytes('\n')
+			rr := ChatCompletionsStreamResponseReceive{}
+			//slog.Debug("next line", string(line))
+			if err != nil {
+				if err == io.EOF {
+					c.sendWithFinish(revCh)
+					break
+				}
+				c.sendWithError(revCh, fmt.Errorf("error reading response body line: %w", err))
 				break
 			}
-			return fmt.Errorf("error reading response body line: %w", err)
+
+			prefix := []byte("data: ")
+
+			if !bytes.HasPrefix(line, prefix) {
+				//slog.Debug("no hava prefix,continue", slog.String("line", string(line)))
+				continue
+			}
+
+			line = bytes.TrimPrefix(bytes.TrimSpace(line), prefix)
+
+			if string(line) == "[DONE]" {
+				c.sendWithFinish(revCh)
+				break
+			}
+
+			err = json.Unmarshal(line, &rr)
+			if err != nil {
+				c.sendWithError(revCh, fmt.Errorf("error unmarshalling response body line: %w", err))
+				break
+			}
+
+			c.sendWithMsg(revCh, &rr)
 		}
+	}()
 
-		prefix := []byte("data: ")
+	return revCh
+}
 
-		if !bytes.HasPrefix(line, prefix) {
-			//fmt.Println("no hava prefix,continue")
-			continue
-		}
+func (c *ChatCompletionsStreamResponse) sendWithMsg(ch chan<- *ChatCompletionsStreamResponseReceive, msg *ChatCompletionsStreamResponseReceive) {
+	ch <- msg
+}
 
-		line = bytes.TrimPrefix(bytes.TrimSpace(line), prefix)
-
-		if string(line) == "[DONE]" {
-			break
-		}
-
-		//fmt.Printf("trim prefix line: %v %v %v\n", string(line), "[DONE]", string(line) == "[DONE]")
-
-		rr := ChatCompletionsResponse{}
-		err = json.Unmarshal(line, &rr)
-		if err != nil {
-			return fmt.Errorf("error unmarshalling response body line: %w", err)
-		}
-		respCh <- &rr
+func (c *ChatCompletionsStreamResponse) sendWithError(ch chan<- *ChatCompletionsStreamResponseReceive, err error) {
+	ch <- &ChatCompletionsStreamResponseReceive{
+		err: err,
 	}
-
-	done <- struct{}{}
-
-	return nil
 }
 
-// IsFinishStop the current session has been generated
-func (i *ChatCompletionsResponseChoices) IsFinishStop() bool {
-	return i.FinishReason == FinishReasonStop
+func (c *ChatCompletionsStreamResponse) sendWithFinish(ch chan<- *ChatCompletionsStreamResponseReceive) {
+	ch <- &ChatCompletionsStreamResponseReceive{
+		isFinished: true,
+	}
 }
 
-// IsFinishLength the current session has not yet been generated and has been truncated for some reason
-func (i *ChatCompletionsResponseChoices) IsFinishLength() bool {
-	return i.FinishReason == FinishReasonLength
-}
-
-// CanGetContent to determine whether the conversation can be successfully obtained.
-func (c *ChatCompletionsResponse) CanGetContent() bool {
+func (c *ChatCompletionsStreamResponseReceive) GetMessage() (*ChatCompletionsMessage, error) {
+	if c.err != nil {
+		return nil, c.err
+	}
+	if c.isFinished {
+		return nil, io.EOF
+	}
+	if len(c.Choices) == 0 {
+		return nil, fmt.Errorf("empty choices")
+	}
 	for _, choice := range c.Choices {
 		if choice.FinishReason == FinishReasonStop {
-			return false
+			return nil, io.EOF
 		}
 		if choice.Message != nil {
-			if len(choice.Message.Content) == 0 {
-				return false
-			}
+			return choice.Message, nil
 		}
 		if choice.Delta != nil {
-			if len(choice.Delta.Content) == 0 {
-				return false
-			}
+			return choice.Delta, nil
 		}
 	}
-	return true
+
+	return nil, fmt.Errorf("no such choice")
 }
