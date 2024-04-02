@@ -8,7 +8,7 @@
 
 **简体中文** | [English](README.md)
 
-为 [MoonshotAI](https://moonshot.cn) 创建的AI [Kimi](https://kimi.moonshot.cn) 提供的 Go SDK。
+为 [月之暗面/MoonshotAI](https://moonshot.cn) 创建的AI [Kimi](https://kimi.moonshot.cn) 提供的 Go SDK。
 
 ## 特性
 
