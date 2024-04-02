@@ -12,11 +12,14 @@ import (
 )
 
 func NewTestClient() (*moonshot.Client, error) {
-	err := godotenv.Load()
-	if err != nil {
-		panic(err)
-	}
 	key, ok := os.LookupEnv("MOONSHOT_KEY")
+	if !ok {
+		err := godotenv.Load()
+		if err != nil {
+			return nil, err
+		}
+		key, ok = os.LookupEnv("MOONSHOT_KEY")
+	}
 	if !ok {
 		return nil, errors.New("missing environment variable: MOONSHOT_KEY")
 	}

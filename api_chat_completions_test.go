@@ -117,6 +117,14 @@ func TestChatStream(t *testing.T) {
 			t.Error(err)
 			continue
 		}
-		t.Logf("Role: %s,Content: %s", msg.Role, msg.Content)
+
+		switch msg.Role {
+		case moonshot.RoleSystem:
+		case moonshot.RoleUser:
+		case moonshot.RoleAssistant:
+		default:
+			t.Logf("Role: %s,Content: %s", msg.Role, msg.Content)
+		}
+
 	}
 }
