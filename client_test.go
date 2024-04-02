@@ -29,8 +29,8 @@ func NewTestClient() (*moonshot.Client, error) {
 	}
 
 	cfg := moonshot.NewConfig(
-		moonshot.SetAPIKey(key),
-		moonshot.SetHost(moonshot.DefaultHost),
+		moonshot.WithAPIKey(key),
+		moonshot.WithHost(moonshot.DefaultHost),
 	)
 
 	isDebug, err := strconv.ParseBool(debug)
@@ -41,15 +41,37 @@ func NewTestClient() (*moonshot.Client, error) {
 		cfg.Debug = isDebug
 	}
 
-	return moonshot.NewClient(cfg)
+	return moonshot.NewClientWithConfig(cfg)
 }
 
 func TestNewClient(t *testing.T) {
 	tt := require.New(t)
 
-	_, err := moonshot.NewClient(nil)
-	tt.NotNil(err, "must got a required api key error")
+	cli, err := moonshot.NewClient("")
+	tt.NotNil(err)
+	tt.Nil(cli)
 
-	_, err = moonshot.NewClient(moonshot.NewConfig())
+	cli, err = moonshot.NewClient("xxxx")
+	tt.Nil(err)
+	tt.NotNil(cli)
+}
+
+func TestNewClientWithConfig(t *testing.T) {
+	tt := require.New(t)
+
+	cli, err := moonshot.NewClientWithConfig(nil)
 	tt.NotNil(err, "must got a required api key error")
+	tt.Nil(cli)
+
+	cli, err = moonshot.NewClientWithConfig(moonshot.NewConfig())
+	tt.NotNil(err, "must got a required api key error")
+	tt.Nil(cli)
+
+	cli, err = moonshot.NewClientWithConfig(
+		moonshot.NewConfig(
+			moonshot.WithAPIKey("xxxx"),
+		),
+	)
+	tt.Nil(err)
+	tt.NotNil(cli)
 }

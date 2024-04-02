@@ -36,19 +36,19 @@ func (c *Config) PreCheck() error {
 
 type Option func(*Config)
 
-func SetHost(host string) Option {
+func WithHost(host string) Option {
 	return func(c *Config) {
 		c.Host = strings.TrimSuffix(host, "/")
 	}
 }
 
-func SetAPIKey(key string) Option {
+func WithAPIKey(key string) Option {
 	return func(c *Config) {
 		c.APIKey = key
 	}
 }
 
-func SetDebugMod() Option {
+func WithDebugMod() Option {
 	return func(c *Config) {
 		c.Debug = true
 	}
