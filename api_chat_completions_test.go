@@ -108,7 +108,7 @@ func TestChatStream(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for receive := range resp.Next() {
+	for receive := range resp.Receive() {
 		msg, err := receive.GetMessage()
 		if err != nil {
 			if errors.Is(err, io.EOF) {

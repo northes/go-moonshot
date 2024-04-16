@@ -85,8 +85,7 @@ func (c *chat) Completions(ctx context.Context, req *ChatCompletionsRequest) (*C
 }
 
 type ChatCompletionsStreamResponse struct {
-	resp       *httpx.Response
-	isFinished bool
+	resp *httpx.Response
 }
 
 type ChatCompletionsStreamResponseReceive struct {
@@ -114,13 +113,18 @@ func (c *chat) CompletionsStream(ctx context.Context, req *ChatCompletionsReques
 	return streamResp, nil
 }
 
-func (c *ChatCompletionsStreamResponse) Next() <-chan *ChatCompletionsStreamResponseReceive {
-	revCh := make(chan *ChatCompletionsStreamResponseReceive, 1)
+func (c *ChatCompletionsStreamResponse) Receive() <-chan *ChatCompletionsStreamResponseReceive {
+	receiveCh := make(chan *ChatCompletionsStreamResponseReceive, 1)
 	reader := bufio.NewReader(c.resp.Raw().Body)
+
+	if c.resp == nil || c.resp.Raw() == nil {
+		c.sendWithError(receiveCh, fmt.Errorf("nil response"))
+		return receiveCh
+	}
 
 	go func() {
 		defer func() {
-			close(revCh)
+			close(receiveCh)
 			_ = c.resp.Raw().Body.Close()
 		}()
 		for {
@@ -129,10 +133,10 @@ func (c *ChatCompletionsStreamResponse) Next() <-chan *ChatCompletionsStreamResp
 			//slog.Debug("next line", string(line))
 			if err != nil {
 				if err == io.EOF {
-					c.sendWithFinish(revCh)
+					c.sendWithFinish(receiveCh)
 					break
 				}
-				c.sendWithError(revCh, fmt.Errorf("error reading response body line: %w", err))
+				c.sendWithError(receiveCh, fmt.Errorf("error reading response body line: %w", err))
 				break
 			}
 
@@ -146,21 +150,21 @@ func (c *ChatCompletionsStreamResponse) Next() <-chan *ChatCompletionsStreamResp
 			line = bytes.TrimPrefix(bytes.TrimSpace(line), prefix)
 
 			if string(line) == "[DONE]" {
-				c.sendWithFinish(revCh)
+				c.sendWithFinish(receiveCh)
 				break
 			}
 
 			err = json.Unmarshal(line, &rr)
 			if err != nil {
-				c.sendWithError(revCh, fmt.Errorf("error unmarshalling response body line: %w", err))
+				c.sendWithError(receiveCh, fmt.Errorf("error unmarshalling response body line: %w", err))
 				break
 			}
 
-			c.sendWithMsg(revCh, &rr)
+			c.sendWithMsg(receiveCh, &rr)
 		}
 	}()
 
-	return revCh
+	return receiveCh
 }
 
 func (c *ChatCompletionsStreamResponse) sendWithMsg(ch chan<- *ChatCompletionsStreamResponseReceive, msg *ChatCompletionsStreamResponseReceive) {
