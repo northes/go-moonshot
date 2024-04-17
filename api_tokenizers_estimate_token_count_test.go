@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/northes/go-moonshot"
-	"github.com/northes/gox"
+	"github.com/northes/go-moonshot/test"
 )
 
 func TestTokenizer(t *testing.T) {
@@ -29,5 +29,5 @@ func TestTokenizer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("%+v", gox.JsonMarshalToStringX(resp))
+	t.Logf("%+v", test.MarshalJsonToStringX(resp))
 }

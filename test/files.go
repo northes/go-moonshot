@@ -3,12 +3,10 @@ package test
 import (
 	"os"
 	"path"
-
-	"github.com/northes/gox"
 )
 
 func GenerateTestContent() []byte {
-	return []byte(gox.FakeAnimalName())
+	return []byte("夕阳无限好")
 }
 
 func GenerateTestFile(content []byte) (string, error) {

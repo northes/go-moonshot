@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/northes/gox/httpx"
+	"github.com/northes/go-moonshot/internal/httpx"
 )
 
 type chat struct {

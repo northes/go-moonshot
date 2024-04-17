@@ -7,7 +7,6 @@ import (
 
 	"github.com/northes/go-moonshot"
 	"github.com/northes/go-moonshot/test"
-	"github.com/northes/gox"
 	"github.com/stretchr/testify/require"
 )
 
@@ -40,7 +39,7 @@ func TestFilesUpload(t *testing.T) {
 		t.Fatal(err)
 	}
 	fileID = resp.ID
-	t.Logf("%+v", gox.JsonMarshalToStringX(resp))
+	t.Logf("%+v", test.MarshalJsonToStringX(resp))
 	err = os.Remove(filePath)
 	if err != nil {
 		t.Fatal(err)
@@ -91,7 +90,7 @@ func TestFilesList(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("file count: %d", len(resp.Data))
-	t.Logf("%+v", gox.JsonMarshalToStringX(resp))
+	t.Logf("%+v", test.MarshalJsonToStringX(resp))
 }
 
 func TestFilesInfo(t *testing.T) {
@@ -103,7 +102,7 @@ func TestFilesInfo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("%+v", gox.JsonMarshalToStringX(resp))
+	t.Logf("%+v", test.MarshalJsonToStringX(resp))
 }
 
 func TestFilesContent(t *testing.T) {
@@ -118,7 +117,7 @@ func TestFilesContent(t *testing.T) {
 
 	require.Equal(t, []byte(resp.Content), fileContent, "file content not match")
 
-	t.Logf("%+v", gox.JsonMarshalToStringX(resp))
+	t.Logf("%+v", test.MarshalJsonToStringX(resp))
 }
 
 func TestFilesDelete(t *testing.T) {
@@ -130,7 +129,7 @@ func TestFilesDelete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("%+v", gox.JsonMarshalToStringX(resp))
+	t.Logf("%+v", test.MarshalJsonToStringX(resp))
 }
 
 /*

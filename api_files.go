@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	utils "github.com/northes/go-moonshot/internal"
+	utils "github.com/northes/go-moonshot/internal/builder"
 )
 
 type files struct {

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/northes/go-moonshot"
-	"github.com/northes/gox"
+	"github.com/northes/go-moonshot/test"
 )
 
 func TestChat(t *testing.T) {
@@ -33,7 +33,7 @@ func TestChat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(gox.JsonMarshalToStringX(resp))
+	t.Log(test.MarshalJsonToStringX(resp))
 	/*
 		{"id":"chatcmpl-dafad118ba6a4d1bb3e10be1734c6213","object":"chat.completion","created":15893254,"model":"moonshot-v1-8k","choices":[{"index":0,"message":{"Role":"assistant","Content":"你好，李雷！1+1等于2。如果你有更复杂的数学问题或者其他问题，也可以随时问我。"},"finish_reason":"stop"}],"usage":{"prompt_tokens":83,"completion_tokens":25,"total_tokens":108}}
 	*/

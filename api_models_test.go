@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/northes/gox"
+	"github.com/northes/go-moonshot/test"
 )
 
 func TestListModels(t *testing.T) {
@@ -16,5 +16,5 @@ func TestListModels(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("%+v", gox.JsonMarshalToStringX(resp))
+	t.Logf("%+v", test.MarshalJsonToStringX(resp))
 }

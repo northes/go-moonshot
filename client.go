@@ -3,8 +3,8 @@ package moonshot
 import (
 	"errors"
 
-	"github.com/northes/gox/httpx"
-	"github.com/northes/gox/httpx/httpxutils"
+	"github.com/northes/go-moonshot/internal/httpx"
+	"github.com/northes/go-moonshot/internal/httpx/tools"
 )
 
 type Client struct {
@@ -39,5 +39,5 @@ func NewClientWithConfig(cfg *Config) (*Client, error) {
 func (c *Client) HTTPClient() *httpx.Client {
 	return httpx.NewClient(c.cfg.Host,
 		httpx.WithDebug(c.cfg.Debug),
-	).AddHeader(httpxutils.AuthorizationHeaderKey, httpxutils.ToBearToken(c.cfg.APIKey))
+	).AddHeader(tools.AuthorizationHeaderKey, tools.ToBearToken(c.cfg.APIKey))
 }

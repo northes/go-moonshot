@@ -6,20 +6,12 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/joho/godotenv"
 	"github.com/northes/go-moonshot"
 	"github.com/stretchr/testify/require"
 )
 
 func NewTestClient() (*moonshot.Client, error) {
 	key, ok := os.LookupEnv("MOONSHOT_KEY")
-	if !ok {
-		err := godotenv.Load()
-		if err != nil {
-			return nil, err
-		}
-		key, ok = os.LookupEnv("MOONSHOT_KEY")
-	}
 	if !ok {
 		return nil, errors.New("missing environment variable: MOONSHOT_KEY")
 	}
