@@ -11,13 +11,21 @@
 A Go SDK for [Kimi](https://kimi.moonshot.cn) which created
 by [MoonshotAI](https://moonshot.cn).
 
-## Feature
+## 🚀 Installation
 
-- Ergonomic API, chain operation.
+```bash
+go get github.com/northes/go-moonshot
+```
+
+You can find the docs at [go docs](https://pkg.go.dev/github.com/northes/go-moonshot).
+
+## 🤘 Feature
+
+- Easy to use and simple API, chain operation.
 - Full API support.
 - Predefined enumeration.
 
-## Supported API
+##  📄 Supported API
 
 | API                     | Done |
 |-------------------------|------|
@@ -31,7 +39,7 @@ by [MoonshotAI](https://moonshot.cn).
 | Get File Contents       | ✅    |
 | Estimate Token Count    | ✅    |
 
-## Usage
+## 🥪 Usage
 
 ### Initialize client
 
@@ -113,7 +121,11 @@ for receive := range resp.Receive() {
 }
 ```
 
-## License
+## 🤝  Missing a Feature?
+
+Feel free to open a new issue, or contact me.
+
+## 📘 License
 
 This is open-sourced library licensed under the [MIT license](LICENSE).
 
