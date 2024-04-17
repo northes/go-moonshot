@@ -142,7 +142,7 @@ func TestFilesDeleteAll(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for range 10 {
+	for i := 0; i < 10; i++ {
 		fp, _ := test.GenerateTestFile(test.GenerateTestContent())
 		_, _ = cli.Files().Upload(&moonshot.FilesUploadRequest{
 			Name:    filepath.Base(fp),
