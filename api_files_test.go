@@ -132,48 +132,50 @@ func TestFilesDelete(t *testing.T) {
 	t.Logf("%+v", test.MarshalJsonToStringX(resp))
 }
 
-/*
-❗ This test may lead to unexpected results
-*/
-func TestFilesDeleteAll(t *testing.T) {
-
+func TestFilesBatchDelete(t *testing.T) {
 	cli, err := NewTestClient()
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	fileIdList := make([]string, 0)
+
 	for i := 0; i < 10; i++ {
 		fp, _ := test.GenerateTestFile(test.GenerateTestContent())
-		_, _ = cli.Files().Upload(&moonshot.FilesUploadRequest{
+		uploadResp, err := cli.Files().Upload(&moonshot.FilesUploadRequest{
 			Name:    filepath.Base(fp),
 			Path:    fp,
 			Purpose: moonshot.FilePurposeExtract,
 		})
+		if err != nil {
+			t.Logf("upload file err: %v", err)
+			continue
+		}
+		fileIdList = append(fileIdList, uploadResp.ID)
 	}
 
-	listResp, err := cli.Files().Lists()
+	t.Logf("file id to delete: %v", fileIdList)
+
+	deleteAllResp, err := cli.Files().BatchDelete(&moonshot.FilesBatchDeleteRequest{
+		FileIDList: fileIdList,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	deleteAllResp, err := cli.Files().DeleteAll()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	require.EqualValues(t, func(in []*moonshot.FilesListResponseData) (ls []string) {
+	require.EqualValues(t, func(in []string) (ls []string) {
 		for _, v := range in {
-			ls = append(ls, v.ID)
+			ls = append(ls, v)
 		}
 		return
-	}(listResp.Data), func(in []*moonshot.FilesDeleteResponse) (ls []string) {
+	}(fileIdList), func(in []*moonshot.FilesDeleteResponse) (ls []string) {
 		for _, resp := range in {
 			ls = append(ls, resp.ID)
 		}
 		return
 	}(deleteAllResp.RespList), "must delete all files")
 
-	t.Logf("Deleted Files ID List: %v", func(ls []*moonshot.FilesDeleteResponse) (l []string) {
+	t.Logf("deleted Files ID List: %v", func(ls []*moonshot.FilesDeleteResponse) (l []string) {
 		for _, v := range ls {
 			l = append(l, v.ID)
 		}
