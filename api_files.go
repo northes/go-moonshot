@@ -2,17 +2,28 @@ package moonshot
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 
 	utils "github.com/northes/go-moonshot/internal/builder"
 )
 
+type IFiles interface {
+	Upload(ctx context.Context, req *FilesUploadRequest) (resp *FilesUploadResponse, err error)
+	UploadBytes(ctx context.Context, req *FilesUploadBytesRequest) (resp *FilesUploadBytesResponse, err error)
+	List(ctx context.Context) (res *FilesListResponse, err error)
+	Delete(ctx context.Context, fileID string) (resp *FilesDeleteResponse, err error)
+	BatchDelete(ctx context.Context, req *FilesBatchDeleteRequest) (resp *FilesBatchDeleteResponse, err error)
+	Info(ctx context.Context, fileID string) (resp *FilesInfoResponse, err error)
+	Content(ctx context.Context, fileID string) (resp *FileContentResponse, err error)
+}
+
 type files struct {
 	client *Client
 }
 
-func (c *Client) Files() *files {
+func (c *Client) Files() IFiles {
 	return &files{
 		client: c,
 	}
@@ -34,7 +45,7 @@ type FilesUploadResponse struct {
 	StatusDetails string `json:"status_details"`
 }
 
-func (f *files) Upload(req *FilesUploadRequest) (*FilesUploadResponse, error) {
+func (f *files) Upload(ctx context.Context, req *FilesUploadRequest) (*FilesUploadResponse, error) {
 	const path = "/v1/files"
 
 	var b bytes.Buffer
@@ -98,7 +109,7 @@ type FilesUploadBytesResponse struct {
 	StatusDetails string `json:"status_details"`
 }
 
-func (f *files) UploadBytes(req *FilesUploadBytesRequest) (*FilesUploadBytesResponse, error) {
+func (f *files) UploadBytes(ctx context.Context, req *FilesUploadBytesRequest) (*FilesUploadBytesResponse, error) {
 	const path = "/v1/files"
 
 	var b bytes.Buffer
@@ -157,9 +168,9 @@ type FilesListResponseData struct {
 	StatusDetail string       `json:"status_detail"`
 }
 
-func (f *files) Lists() (*FilesListResponse, error) {
+func (f *files) List(ctx context.Context) (*FilesListResponse, error) {
 	const path = "/v1/files"
-	resp, err := f.client.HTTPClient().SetPath(path).Get()
+	resp, err := f.client.HTTPClient().SetPath(path).Get(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -181,10 +192,10 @@ type FilesDeleteResponse struct {
 	Object  string `json:"object"`
 }
 
-func (f *files) Delete(fileID string) (*FilesDeleteResponse, error) {
+func (f *files) Delete(ctx context.Context, fileID string) (*FilesDeleteResponse, error) {
 	const path = "/v1/files/%s"
 	fullPath := fmt.Sprintf(path, fileID)
-	resp, err := f.client.HTTPClient().SetPath(fullPath).Delete()
+	resp, err := f.client.HTTPClient().SetPath(fullPath).Delete(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -203,10 +214,11 @@ type FilesBatchDeleteRequest struct {
 	FileIDList []string `json:"file_ids"`
 }
 type FilesBatchDeleteResponse struct {
-	RespList []*FilesDeleteResponse `json:"resp_list"`
+	RespList  []*FilesDeleteResponse `json:"resp_list"`
+	ErrorList []error                `json:"error_list"`
 }
 
-func (f *files) BatchDelete(req *FilesBatchDeleteRequest) (*FilesBatchDeleteResponse, error) {
+func (f *files) BatchDelete(ctx context.Context, req *FilesBatchDeleteRequest) (*FilesBatchDeleteResponse, error) {
 	if req == nil || len(req.FileIDList) == 0 {
 		return nil, fmt.Errorf("batch delete request must contain at least one file id")
 	}
@@ -216,7 +228,7 @@ func (f *files) BatchDelete(req *FilesBatchDeleteRequest) (*FilesBatchDeleteResp
 	}
 
 	for _, fileID := range req.FileIDList {
-		deleteResp, err := f.Delete(fileID)
+		deleteResp, err := f.Delete(ctx, fileID)
 		if err != nil {
 			return nil, err
 		}
@@ -237,10 +249,10 @@ type FilesInfoResponse struct {
 	StatusDetails string `json:"status_details"`
 }
 
-func (f *files) Info(fileID string) (*FilesInfoResponse, error) {
+func (f *files) Info(ctx context.Context, fileID string) (*FilesInfoResponse, error) {
 	const path = "/v1/files/%s"
 	fullPath := fmt.Sprintf(path, fileID)
-	resp, err := f.client.HTTPClient().SetPath(fullPath).Get()
+	resp, err := f.client.HTTPClient().SetPath(fullPath).Get(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -263,10 +275,10 @@ type FileContentResponse struct {
 	Type     string `json:"type"`
 }
 
-func (f *files) Content(fileID string) (*FileContentResponse, error) {
+func (f *files) Content(ctx context.Context, fileID string) (*FileContentResponse, error) {
 	const path = "/v1/files/%s/content"
 	fullPath := fmt.Sprintf(path, fileID)
-	resp, err := f.client.HTTPClient().SetPath(fullPath).Get()
+	resp, err := f.client.HTTPClient().SetPath(fullPath).Get(ctx)
 	if err != nil {
 		return nil, err
 	}

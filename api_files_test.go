@@ -1,6 +1,7 @@
 package moonshot_test
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -30,7 +31,7 @@ func TestFilesUpload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	resp, err := cli.Files().Upload(&moonshot.FilesUploadRequest{
+	resp, err := cli.Files().Upload(context.Background(), &moonshot.FilesUploadRequest{
 		Name:    filepath.Base(filePath),
 		Path:    filePath,
 		Purpose: moonshot.FilePurposeExtract,
@@ -54,7 +55,7 @@ func TestFilesUploadBytes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	uploadResp, err := cli.Files().UploadBytes(&moonshot.FilesUploadBytesRequest{
+	uploadResp, err := cli.Files().UploadBytes(context.Background(), &moonshot.FilesUploadBytesRequest{
 		Name:    "byteFile.txt",
 		Bytes:   content,
 		Purpose: moonshot.FilePurposeExtract,
@@ -65,14 +66,14 @@ func TestFilesUploadBytes(t *testing.T) {
 	require.Equal(uploadResp.Bytes, len(content))
 
 	// check content
-	contentResp, err := cli.Files().Content(uploadResp.ID)
+	contentResp, err := cli.Files().Content(context.Background(), uploadResp.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 	require.Equal(string(content), contentResp.Content)
 
 	// remove
-	deleteResp, err := cli.Files().Delete(uploadResp.ID)
+	deleteResp, err := cli.Files().Delete(context.Background(), uploadResp.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +86,7 @@ func TestFilesList(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	resp, err := cli.Files().Lists()
+	resp, err := cli.Files().List(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +99,7 @@ func TestFilesInfo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	resp, err := cli.Files().Info(fileID)
+	resp, err := cli.Files().Info(context.Background(), fileID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -110,7 +111,7 @@ func TestFilesContent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	resp, err := cli.Files().Content(fileID)
+	resp, err := cli.Files().Content(context.Background(), fileID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -125,7 +126,7 @@ func TestFilesDelete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	resp, err := cli.Files().Delete(fileID)
+	resp, err := cli.Files().Delete(context.Background(), fileID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -142,7 +143,7 @@ func TestFilesBatchDelete(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		fp, _ := test.GenerateTestFile(test.GenerateTestContent())
-		uploadResp, err := cli.Files().Upload(&moonshot.FilesUploadRequest{
+		uploadResp, err := cli.Files().Upload(context.Background(), &moonshot.FilesUploadRequest{
 			Name:    filepath.Base(fp),
 			Path:    fp,
 			Purpose: moonshot.FilePurposeExtract,
@@ -156,7 +157,7 @@ func TestFilesBatchDelete(t *testing.T) {
 
 	t.Logf("file id to delete: %v", fileIdList)
 
-	deleteAllResp, err := cli.Files().BatchDelete(&moonshot.FilesBatchDeleteRequest{
+	deleteAllResp, err := cli.Files().BatchDelete(context.Background(), &moonshot.FilesBatchDeleteRequest{
 		FileIDList: fileIdList,
 	})
 	if err != nil {

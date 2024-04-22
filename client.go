@@ -1,8 +1,6 @@
 package moonshot
 
 import (
-	"errors"
-
 	"github.com/northes/go-moonshot/internal/httpx"
 	"github.com/northes/go-moonshot/internal/httpx/tools"
 )
@@ -12,13 +10,13 @@ type Client struct {
 }
 
 func NewClient(key string) (*Client, error) {
-	if len(key) == 0 {
-		return nil, errors.New("key is required")
-	}
-
 	cfg := NewConfig(
 		WithAPIKey(key),
 	)
+
+	if err := cfg.PreCheck(); err != nil {
+		return nil, err
+	}
 
 	return NewClientWithConfig(cfg)
 }
@@ -27,12 +25,15 @@ func NewClientWithConfig(cfg *Config) (*Client, error) {
 	if cfg == nil {
 		cfg = newConfigDefault()
 	}
+
 	if err := cfg.PreCheck(); err != nil {
 		return nil, err
 	}
+
 	c := &Client{
 		cfg: cfg,
 	}
+
 	return c, nil
 }
 
