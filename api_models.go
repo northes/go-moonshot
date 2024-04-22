@@ -4,11 +4,15 @@ import (
 	"context"
 )
 
+type IModels interface {
+	List(ctx context.Context) (*ListModelsResponse, error)
+}
+
 type models struct {
 	client *Client
 }
 
-func (c *Client) Models() *models {
+func (c *Client) Models() IModels {
 	return &models{
 		client: c,
 	}
@@ -50,7 +54,7 @@ type ListModelsResponseDataPermission struct {
 
 func (m *models) List(ctx context.Context) (*ListModelsResponse, error) {
 	const path = "/v1/models"
-	resp, err := m.client.HTTPClient().SetPath(path).Get()
+	resp, err := m.client.HTTPClient().SetPath(path).Get(ctx)
 	if err != nil {
 		return nil, err
 	}

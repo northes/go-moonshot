@@ -11,11 +11,16 @@ import (
 	"github.com/northes/go-moonshot/internal/httpx"
 )
 
+type IChat interface {
+	Completions(ctx context.Context, req *ChatCompletionsRequest) (*ChatCompletionsResponse, error)
+	CompletionsStream(ctx context.Context, req *ChatCompletionsRequest) (*ChatCompletionsStreamResponse, error)
+}
+
 type chat struct {
 	client *Client
 }
 
-func (c *Client) Chat() *chat {
+func (c *Client) Chat() IChat {
 	return &chat{
 		client: c,
 	}
@@ -70,7 +75,7 @@ func (c *chat) Completions(ctx context.Context, req *ChatCompletionsRequest) (*C
 	const path = "/v1/chat/completions"
 	req.Stream = false
 	chatCompletionsResp := new(ChatCompletionsResponse)
-	resp, err := c.client.HTTPClient().SetPath(path).SetBody(req).Post()
+	resp, err := c.client.HTTPClient().SetPath(path).SetBody(req).Post(ctx)
 	if err != nil {
 		return chatCompletionsResp, err
 	}
@@ -100,7 +105,7 @@ func (c *chat) CompletionsStream(ctx context.Context, req *ChatCompletionsReques
 
 	req.Stream = true
 
-	resp, err := c.client.HTTPClient().SetPath(path).SetBody(req).Post()
+	resp, err := c.client.HTTPClient().SetPath(path).SetBody(req).Post(ctx)
 	if err != nil {
 		return nil, err
 	}

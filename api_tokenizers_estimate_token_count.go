@@ -4,11 +4,15 @@ import (
 	"context"
 )
 
+type ITokenizers interface {
+	EstimateTokenCount(ctx context.Context, req *TokenizersEstimateTokenCountRequest) (resp *TokenizersEstimateTokenCountResponse, err error)
+}
+
 type tokenizersEstimateTokenCount struct {
 	client *Client
 }
 
-func (c *Client) Tokenizers() *tokenizersEstimateTokenCount {
+func (c *Client) Tokenizers() ITokenizers {
 	return &tokenizersEstimateTokenCount{
 		client: c,
 	}
@@ -31,7 +35,7 @@ type TokenizersEstimateTokenCountResponseData struct {
 func (t *tokenizersEstimateTokenCount) EstimateTokenCount(ctx context.Context, req *TokenizersEstimateTokenCountRequest) (*TokenizersEstimateTokenCountResponse, error) {
 	const path = "/v1/tokenizers/estimate-token-count"
 	estimateTokenCountResp := new(TokenizersEstimateTokenCountResponse)
-	resp, err := t.client.HTTPClient().SetPath(path).SetBody(req).Post()
+	resp, err := t.client.HTTPClient().SetPath(path).SetBody(req).Post(ctx)
 	if err != nil {
 		return nil, err
 	}
