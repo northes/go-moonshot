@@ -61,7 +61,7 @@ func (f *files) Upload(req *FilesUploadRequest) (*FilesUploadResponse, error) {
 	}
 
 	resp, err := f.client.HTTPClient().
-		AddPath(path).
+		SetPath(path).
 		SetBody(&b).
 		SetContentType(builder.FormDataContentType()).
 		Post()
@@ -119,7 +119,7 @@ func (f *files) UploadBytes(req *FilesUploadBytesRequest) (*FilesUploadBytesResp
 	}
 
 	resp, err := f.client.HTTPClient().
-		AddPath(path).
+		SetPath(path).
 		SetBody(&b).
 		SetContentType(builder.FormDataContentType()).
 		Post()
@@ -159,7 +159,7 @@ type FilesListResponseData struct {
 
 func (f *files) Lists() (*FilesListResponse, error) {
 	const path = "/v1/files"
-	resp, err := f.client.HTTPClient().AddPath(path).Get()
+	resp, err := f.client.HTTPClient().SetPath(path).Get()
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +184,7 @@ type FilesDeleteResponse struct {
 func (f *files) Delete(fileID string) (*FilesDeleteResponse, error) {
 	const path = "/v1/files/%s"
 	fullPath := fmt.Sprintf(path, fileID)
-	resp, err := f.client.HTTPClient().AddPath(fullPath).Delete()
+	resp, err := f.client.HTTPClient().SetPath(fullPath).Delete()
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +236,7 @@ type FilesInfoResponse struct {
 func (f *files) Info(fileID string) (*FilesInfoResponse, error) {
 	const path = "/v1/files/%s"
 	fullPath := fmt.Sprintf(path, fileID)
-	resp, err := f.client.HTTPClient().AddPath(fullPath).Get()
+	resp, err := f.client.HTTPClient().SetPath(fullPath).Get()
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +262,7 @@ type FileContentResponse struct {
 func (f *files) Content(fileID string) (*FileContentResponse, error) {
 	const path = "/v1/files/%s/content"
 	fullPath := fmt.Sprintf(path, fileID)
-	resp, err := f.client.HTTPClient().AddPath(fullPath).Get()
+	resp, err := f.client.HTTPClient().SetPath(fullPath).Get()
 	if err != nil {
 		return nil, err
 	}

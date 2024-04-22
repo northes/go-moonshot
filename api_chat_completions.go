@@ -70,7 +70,7 @@ func (c *chat) Completions(ctx context.Context, req *ChatCompletionsRequest) (*C
 	const path = "/v1/chat/completions"
 	req.Stream = false
 	chatCompletionsResp := new(ChatCompletionsResponse)
-	resp, err := c.client.HTTPClient().AddPath(path).SetBody(req).Post()
+	resp, err := c.client.HTTPClient().SetPath(path).SetBody(req).Post()
 	if err != nil {
 		return chatCompletionsResp, err
 	}
@@ -100,7 +100,7 @@ func (c *chat) CompletionsStream(ctx context.Context, req *ChatCompletionsReques
 
 	req.Stream = true
 
-	resp, err := c.client.HTTPClient().AddPath(path).SetBody(req).Post()
+	resp, err := c.client.HTTPClient().SetPath(path).SetBody(req).Post()
 	if err != nil {
 		return nil, err
 	}

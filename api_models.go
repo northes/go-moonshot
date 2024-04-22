@@ -50,7 +50,7 @@ type ListModelsResponseDataPermission struct {
 
 func (m *models) List(ctx context.Context) (*ListModelsResponse, error) {
 	const path = "/v1/models"
-	resp, err := m.client.HTTPClient().AddPath(path).Get()
+	resp, err := m.client.HTTPClient().SetPath(path).Get()
 	if err != nil {
 		return nil, err
 	}
