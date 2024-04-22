@@ -199,20 +199,24 @@ func (f *files) Delete(fileID string) (*FilesDeleteResponse, error) {
 	return deleteResponse, nil
 }
 
-type FilesDeleteAllResponse struct {
+type FilesBatchDeleteRequest struct {
+	FileIDList []string `json:"file_ids"`
+}
+type FilesBatchDeleteResponse struct {
 	RespList []*FilesDeleteResponse `json:"resp_list"`
 }
 
-func (f *files) DeleteAll() (*FilesDeleteAllResponse, error) {
-	listResp, err := f.Lists()
-	if err != nil {
-		return nil, err
+func (f *files) BatchDelete(req *FilesBatchDeleteRequest) (*FilesBatchDeleteResponse, error) {
+	if req == nil || len(req.FileIDList) == 0 {
+		return nil, fmt.Errorf("batch delete request must contain at least one file id")
 	}
 
-	deleteAllResp := new(FilesDeleteAllResponse)
+	deleteAllResp := &FilesBatchDeleteResponse{
+		RespList: make([]*FilesDeleteResponse, 0),
+	}
 
-	for _, data := range listResp.Data {
-		deleteResp, err := f.Delete(data.ID)
+	for _, fileID := range req.FileIDList {
+		deleteResp, err := f.Delete(fileID)
 		if err != nil {
 			return nil, err
 		}
