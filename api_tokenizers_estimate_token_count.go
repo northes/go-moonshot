@@ -31,7 +31,7 @@ type TokenizersEstimateTokenCountResponseData struct {
 func (t *tokenizersEstimateTokenCount) EstimateTokenCount(ctx context.Context, req *TokenizersEstimateTokenCountRequest) (*TokenizersEstimateTokenCountResponse, error) {
 	const path = "/v1/tokenizers/estimate-token-count"
 	estimateTokenCountResp := new(TokenizersEstimateTokenCountResponse)
-	resp, err := t.client.HTTPClient().AddPath(path).SetBody(req).Post()
+	resp, err := t.client.HTTPClient().SetPath(path).SetBody(req).Post()
 	if err != nil {
 		return nil, err
 	}

@@ -47,9 +47,3 @@ func WithAPIKey(key string) Option {
 		c.APIKey = key
 	}
 }
-
-func WithDebugMod() Option {
-	return func(c *Config) {
-		c.Debug = true
-	}
-}

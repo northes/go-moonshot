@@ -37,7 +37,5 @@ func NewClientWithConfig(cfg *Config) (*Client, error) {
 }
 
 func (c *Client) HTTPClient() *httpx.Client {
-	return httpx.NewClient(c.cfg.Host,
-		httpx.WithDebug(c.cfg.Debug),
-	).AddHeader(tools.AuthorizationHeaderKey, tools.ToBearToken(c.cfg.APIKey))
+	return httpx.NewClient(c.cfg.Host).AddHeader(tools.AuthorizationHeaderKey, tools.ToBearToken(c.cfg.APIKey))
 }

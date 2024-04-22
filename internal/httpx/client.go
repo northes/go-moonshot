@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"net/url"
 	"time"
@@ -23,14 +22,11 @@ type Client struct {
 	contentType string
 	timeout     time.Duration
 	response    http.Response
-	logger      Logger
-	debug       bool
 	error       error
 }
 
 type Response struct {
 	response *http.Response
-	logger   Logger
 }
 
 func NewClient(rawURL string, opts ...Option) *Client {
@@ -47,9 +43,7 @@ func NewClient(rawURL string, opts ...Option) *Client {
 			opt(cli)
 		}
 	}
-	if cli.logger == nil {
-		cli.logger = slog.Default()
-	}
+
 	return cli
 }
 
@@ -75,9 +69,8 @@ func (c *Client) AddHeaders(kv map[string]string) *Client {
 	return c
 }
 
-func (c *Client) AddPath(paths ...string) *Client {
-	c.url = c.url.JoinPath(paths...)
-	//c.url.JoinPath(paths...)
+func (c *Client) SetPath(path string) *Client {
+	c.url.Path = path
 	return c
 }
 
@@ -169,22 +162,8 @@ func (c *Client) do(ctxs ...context.Context) (*Response, error) {
 		req.Header.Set(tools.ContentTypeHeaderKey, c.contentType)
 	}
 
-	if c.debug {
-		c.logger.Info("request",
-			slog.String("url", c.url.String()),
-			slog.String("body", fmt.Sprintf("%+v", c.body)),
-			slog.String("header", fmt.Sprintf("%+v", req.Header)),
-		)
-	}
-
 	client := http.Client{
 		Timeout: c.timeout,
-	}
-
-	if c.debug {
-		c.logger.Info("client",
-			slog.Duration("timeout", client.Timeout),
-		)
 	}
 
 	resp, err := client.Do(req.WithContext(ctx))
@@ -194,33 +173,9 @@ func (c *Client) do(ctxs ...context.Context) (*Response, error) {
 
 	response := &Response{
 		response: resp,
-		logger:   c.logger,
-	}
-
-	if c.debug {
-		slog.Info("response",
-			slog.String("resp", response.String()),
-		)
 	}
 
 	return response, nil
-}
-
-func (r *Response) String() string {
-	b := r.response.Body
-	if b == nil {
-		return ""
-	}
-	defer func() {
-		_ = r.response.Body.Close()
-	}()
-	body, err := io.ReadAll(b)
-	if err != nil {
-		r.logger.Error(err.Error())
-		return ""
-	}
-	r.response.Body = io.NopCloser(bytes.NewBuffer(body))
-	return fmt.Sprintf("Status: %s\n  Body: %s", r.response.Status, string(body))
 }
 
 func (r *Response) Unmarshal(body any) error {
