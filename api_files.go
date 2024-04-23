@@ -160,8 +160,8 @@ type FilesListResponse struct {
 type FilesListResponseData struct {
 	ID           string       `json:"id"`
 	Object       string       `json:"object"`
-	Bytes        int64        `json:"bytes"`
-	CreatedAt    int64        `json:"created_at"`
+	Bytes        int          `json:"bytes"`
+	CreatedAt    int          `json:"created_at"`
 	Filename     string       `json:"filename"`
 	Purpose      FilesPurpose `json:"purpose"`
 	Status       string       `json:"status"`
@@ -239,7 +239,7 @@ func (f *files) BatchDelete(ctx context.Context, req *FilesBatchDeleteRequest) (
 }
 
 type FilesInfoResponse struct {
-	Id            string `json:"id"`
+	ID            string `json:"id"`
 	Object        string `json:"object"`
 	Bytes         int    `json:"bytes"`
 	CreatedAt     int    `json:"created_at"`
