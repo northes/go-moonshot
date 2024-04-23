@@ -8,6 +8,10 @@ const (
 	RoleAssistant ChatCompletionsMessageRole = "assistant"
 )
 
+func (c ChatCompletionsMessageRole) String() string {
+	return string(c)
+}
+
 type ChatCompletionsModelID string
 
 const (
@@ -16,9 +20,17 @@ const (
 	ModelMoonshotV1128K ChatCompletionsModelID = "moonshot-v1-128k"
 )
 
+func (c ChatCompletionsModelID) String() string {
+	return string(c)
+}
+
 type ChatCompletionsFinishReason string
 
 const (
 	FinishReasonStop   ChatCompletionsFinishReason = "stop"
 	FinishReasonLength ChatCompletionsFinishReason = "length"
 )
+
+func (c ChatCompletionsFinishReason) String() string {
+	return string(c)
+}

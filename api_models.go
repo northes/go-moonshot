@@ -29,7 +29,7 @@ type ListModelsResponse struct {
 
 type ListModelResponseData struct {
 	Created    int                                 `json:"created"`
-	Id         string                              `json:"id"`
+	ID         string                              `json:"id"`
 	Object     string                              `json:"object"`
 	OwnedBy    string                              `json:"owned_by"`
 	Permission []*ListModelsResponseDataPermission `json:"permission"`
@@ -39,7 +39,7 @@ type ListModelResponseData struct {
 
 type ListModelsResponseDataPermission struct {
 	Created            int    `json:"created"`
-	Id                 string `json:"id"`
+	ID                 string `json:"id"`
 	Object             string `json:"object"`
 	AllowCreateEngine  bool   `json:"allow_create_engine"`
 	AllowSampling      bool   `json:"allow_sampling"`

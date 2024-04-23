@@ -29,7 +29,7 @@ type TokenizersEstimateTokenCountResponse struct {
 }
 
 type TokenizersEstimateTokenCountResponseData struct {
-	TotalTokens int64 `json:"total_tokens"`
+	TotalTokens int `json:"total_tokens"`
 }
 
 func (t *tokenizersEstimateTokenCount) EstimateTokenCount(ctx context.Context, req *TokenizersEstimateTokenCountRequest) (*TokenizersEstimateTokenCountResponse, error) {

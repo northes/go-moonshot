@@ -34,10 +34,10 @@ type ChatCompletionsMessage struct {
 type ChatCompletionsRequest struct {
 	Messages         []*ChatCompletionsMessage `json:"messages"`
 	Model            ChatCompletionsModelID    `json:"model"`
-	MaxTokens        int64                     `json:"max_tokens"`
+	MaxTokens        int                       `json:"max_tokens"`
 	Temperature      float64                   `json:"temperature"`
 	TopP             float64                   `json:"top_p"`
-	N                int64                     `json:"n"`
+	N                int                       `json:"n"`
 	PresencePenalty  float64                   `json:"presence_penalty"`
 	FrequencyPenalty float64                   `json:"frequency_penalty"`
 	Stop             []string                  `json:"stop"`
@@ -45,7 +45,7 @@ type ChatCompletionsRequest struct {
 }
 
 type ChatCompletionsResponse struct {
-	Id      string                            `json:"id"`
+	ID      string                            `json:"id"`
 	Object  string                            `json:"object"`
 	Created int                               `json:"created"`
 	Model   string                            `json:"model"`
