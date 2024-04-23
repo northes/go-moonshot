@@ -40,6 +40,7 @@ You can find the docs at [go docs](https://pkg.go.dev/github.com/northes/go-moon
 | Get File Info           | ✅    |
 | Get File Contents       | ✅    |
 | Estimate Token Count    | ✅    |
+| User Balance            | ✅    |
 
 ## 🥪 Usage
 
