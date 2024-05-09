@@ -41,7 +41,7 @@ func TestChatStream(t *testing.T) {
 	builder := moonshot.NewChatCompletionsBuilder()
 	builder.SetModel(moonshot.ModelMoonshotV18K).
 		AddUserContent("你好，我叫李雷，1+1等于多少？").
-		SetStream()
+		SetStream(true)
 
 	resp, err := cli.Chat().CompletionsStream(context.Background(), builder.ToRequest())
 	if err != nil {

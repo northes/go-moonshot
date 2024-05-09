@@ -9,7 +9,7 @@ type IChatCompletionsBuilder interface {
 
 	SetModel(model ChatCompletionsModelID) IChatCompletionsBuilder
 	SetTemperature(temperature float64) IChatCompletionsBuilder
-	SetStream() IChatCompletionsBuilder
+	SetStream(enable bool) IChatCompletionsBuilder
 	SetMaxTokens(num int) IChatCompletionsBuilder
 	SetTopP(num float64) IChatCompletionsBuilder
 	SetN(num int) IChatCompletionsBuilder
@@ -25,13 +25,13 @@ type chatCompletionsBuilder struct {
 }
 
 // NewChatCompletionsBuilder creates a new chat completions builder, or with the given request
-func NewChatCompletionsBuilder(req ...*ChatCompletionsRequest) IChatCompletionsBuilder {
+func NewChatCompletionsBuilder(req ...ChatCompletionsRequest) IChatCompletionsBuilder {
 	builder := &chatCompletionsBuilder{
 		req: &ChatCompletionsRequest{},
 	}
 
-	if len(req) > 0 && req[0] != nil {
-		builder.req = req[0]
+	if len(req) > 0 {
+		builder.req = &req[0]
 	}
 
 	builder.preCheck()
@@ -135,8 +135,8 @@ func (c *chatCompletionsBuilder) SetStop(stop []string) IChatCompletionsBuilder 
 }
 
 // SetStream sets the stream of the request
-func (c *chatCompletionsBuilder) SetStream() IChatCompletionsBuilder {
-	c.req.Stream = true
+func (c *chatCompletionsBuilder) SetStream(enable bool) IChatCompletionsBuilder {
+	c.req.Stream = enable
 	return c
 }
 
