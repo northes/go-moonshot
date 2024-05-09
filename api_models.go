@@ -59,7 +59,7 @@ func (m *models) List(ctx context.Context) (*ListModelsResponse, error) {
 		return nil, err
 	}
 	if !resp.StatusOK() {
-		return nil, StatusCodeToError(resp.Raw().StatusCode)
+		return nil, ResponseToError(resp)
 	}
 	listModelResp := new(ListModelsResponse)
 	err = resp.Unmarshal(listModelResp)

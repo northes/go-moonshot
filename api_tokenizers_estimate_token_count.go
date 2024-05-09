@@ -40,7 +40,7 @@ func (t *tokenizersEstimateTokenCount) EstimateTokenCount(ctx context.Context, r
 		return nil, err
 	}
 	if !resp.StatusOK() {
-		return nil, StatusCodeToError(resp.Raw().StatusCode)
+		return nil, ResponseToError(resp)
 	}
 	err = resp.Unmarshal(estimateTokenCountResp)
 	if err != nil {

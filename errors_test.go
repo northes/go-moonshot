@@ -1,8 +1,7 @@
 package moonshot_test
 
 import (
-	"fmt"
-	"net/http"
+	"context"
 	"testing"
 
 	"github.com/northes/go-moonshot"
@@ -10,13 +9,12 @@ import (
 )
 
 func TestErrors(t *testing.T) {
-	err1 := moonshot.ErrorInvalidRequest
-	codeErr1 := moonshot.StatusCodeToError(400)
-	require.ErrorIs(t, codeErr1, err1)
-}
-
-func TestErrorsCodeNotExist(t *testing.T) {
-	code := 200
-	err := moonshot.StatusCodeToError(code)
-	require.Equal(t, err, fmt.Errorf("[%d] %s", code, http.StatusText(code)))
+	tt := require.New(t)
+	cli, err := NewTestClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = cli.Chat().Completions(context.Background(), moonshot.NewChatCompletionsBuilder().SetModel("xxxx").ToRequest())
+	tt.NotNil(err)
+	t.Log(err)
 }

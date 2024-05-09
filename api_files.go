@@ -79,11 +79,9 @@ func (f *files) Upload(ctx context.Context, req *FilesUploadRequest) (*FilesUplo
 	if err != nil {
 		return nil, err
 	}
-
 	if !resp.StatusOK() {
-		return nil, StatusCodeToError(resp.Raw().StatusCode)
+		return nil, ResponseToError(resp)
 	}
-
 	uploadResponse := new(FilesUploadResponse)
 	err = resp.Unmarshal(uploadResponse)
 	if err != nil {
@@ -137,11 +135,9 @@ func (f *files) UploadBytes(ctx context.Context, req *FilesUploadBytesRequest) (
 	if err != nil {
 		return nil, err
 	}
-
 	if !resp.StatusOK() {
-		return nil, StatusCodeToError(resp.Raw().StatusCode)
+		return nil, ResponseToError(resp)
 	}
-
 	uploadResponse := new(FilesUploadBytesResponse)
 	err = resp.Unmarshal(uploadResponse)
 	if err != nil {
@@ -175,7 +171,7 @@ func (f *files) List(ctx context.Context) (*FilesListResponse, error) {
 		return nil, err
 	}
 	if !resp.StatusOK() {
-		return nil, StatusCodeToError(resp.Raw().StatusCode)
+		return nil, ResponseToError(resp)
 	}
 	listResponse := new(FilesListResponse)
 	err = resp.Unmarshal(listResponse)
@@ -186,7 +182,6 @@ func (f *files) List(ctx context.Context) (*FilesListResponse, error) {
 }
 
 type FilesDeleteResponse struct {
-	CommonAPIResponse
 	Deleted bool   `json:"deleted"`
 	ID      string `json:"id"`
 	Object  string `json:"object"`
@@ -200,7 +195,7 @@ func (f *files) Delete(ctx context.Context, fileID string) (*FilesDeleteResponse
 		return nil, err
 	}
 	if !resp.StatusOK() {
-		return nil, StatusCodeToError(resp.Raw().StatusCode)
+		return nil, ResponseToError(resp)
 	}
 	deleteResponse := new(FilesDeleteResponse)
 	err = resp.Unmarshal(deleteResponse)
@@ -257,7 +252,7 @@ func (f *files) Info(ctx context.Context, fileID string) (*FilesInfoResponse, er
 		return nil, err
 	}
 	if !resp.StatusOK() {
-		return nil, StatusCodeToError(resp.Raw().StatusCode)
+		return nil, ResponseToError(resp)
 	}
 	infoResponse := new(FilesInfoResponse)
 	err = resp.Unmarshal(infoResponse)
@@ -283,7 +278,7 @@ func (f *files) Content(ctx context.Context, fileID string) (*FileContentRespons
 		return nil, err
 	}
 	if !resp.StatusOK() {
-		return nil, StatusCodeToError(resp.Raw().StatusCode)
+		return nil, ResponseToError(resp)
 	}
 	contentResponse := new(FileContentResponse)
 	err = resp.Unmarshal(contentResponse)

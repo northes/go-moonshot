@@ -36,7 +36,7 @@ func (u *users) Balance(ctx context.Context) (*UsersBalanceResponse, error) {
 		return nil, err
 	}
 	if !resp.StatusOK() {
-		return nil, StatusCodeToError(resp.Raw().StatusCode)
+		return nil, ResponseToError(resp)
 	}
 	userBalance := new(UsersBalanceResponse)
 	err = resp.Unmarshal(userBalance)

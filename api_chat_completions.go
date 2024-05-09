@@ -80,7 +80,7 @@ func (c *chat) Completions(ctx context.Context, req *ChatCompletionsRequest) (*C
 		return chatCompletionsResp, err
 	}
 	if !resp.StatusOK() {
-		return nil, StatusCodeToError(resp.Raw().StatusCode)
+		return nil, ResponseToError(resp)
 	}
 	err = resp.Unmarshal(chatCompletionsResp)
 	if err != nil {
@@ -110,7 +110,7 @@ func (c *chat) CompletionsStream(ctx context.Context, req *ChatCompletionsReques
 		return nil, err
 	}
 	if !resp.StatusOK() {
-		return nil, StatusCodeToError(resp.Raw().StatusCode)
+		return nil, ResponseToError(resp)
 	}
 
 	streamResp := new(ChatCompletionsStreamResponse)
