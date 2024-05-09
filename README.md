@@ -80,18 +80,52 @@ cli, err := moonshot.NewClientWithConfig(
 )
 ```
 
-### Call API
+### API
+
+#### List Models
 
 ```go
-// List Models
 resp, err := cli.Models().List(context.Background())
 if err != nil {
     return err
 }
 ```
 
+#### Chat Completions
+
 ```go
-// Chat completions(stream)
+// Use builder to build a request more conveniently
+builder := moonshot.NewChatCompletionsBuilder()
+builder.AppendPrompt("你是 Kimi，由 Moonshot AI 提供的人工智能助手，你更擅长中文和英文的对话。你会为用户提供安全，有帮助，准确的回答。同时，你会拒绝一切涉及恐怖主义，种族歧视，黄色暴力等问题的回答。Moonshot AI 为专有名词，不可翻译成其他语言。").
+	AppendUser("你好，我叫李雷，1+1等于多少？").
+	WithTemperature(0.3)
+
+resp, err := cli.Chat().Completions(ctx, builder.ToRequest())
+if err != nil {
+    return err
+}
+// {"id":"cmpl-eb8e8474fbae4e42bea9f6bbf38d56ed","object":"chat.completion","created":2647921,"model":"moonshot-v1-8k","choices":[{"index":0,"message":{"role":"assistant","content":"你好，李雷！1+1等于2。这是一个基本的数学加法运算。如果你有任何其他问题或需要帮助，请随时告诉我。"},"finish_reason":"stop"}],"usage":{"prompt_tokens":87,"completion_tokens":31,"total_tokens":118}}
+
+// do something...
+
+// append context
+for _, choice := range resp.Choices {
+    builder.AppendMessage(choice.Message)
+}
+
+builder.AppendUser("在这个基础上再加3等于多少")
+
+resp, err := cli.Chat().Completions(ctx, builder.ToRequest())
+if err != nil {
+    return err
+}
+// {"id":"cmpl-a7b938eaddc04fbf85fe578a980040ac","object":"chat.completion","created":5455796,"model":"moonshot-v1-8k","choices":[{"index":0,"message":{"role":"assistant","content":"在这个基础上，即1+1=2的结果上再加3，等于5。所以，2+3=5。"},"finish_reason":"stop"}],"usage":{"prompt_tokens":131,"completion_tokens":26,"total_tokens":157}}
+```
+
+#### Chat completions with stream
+
+```go
+// use struct
 resp, err := cli.Chat().CompletionsStream(context.Background(), &moonshot.ChatCompletionsRequest{
     Model: moonshot.ModelMoonshotV18K,
     Messages: []*moonshot.ChatCompletionsMessage{
