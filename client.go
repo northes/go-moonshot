@@ -15,7 +15,7 @@ func NewClient(key string) (*Client, error) {
 		WithAPIKey(key),
 	)
 
-	if err := cfg.PreCheck(); err != nil {
+	if err := cfg.preCheck(); err != nil {
 		return nil, err
 	}
 
@@ -28,7 +28,7 @@ func NewClientWithConfig(cfg *Config) (*Client, error) {
 		cfg = newConfigDefault()
 	}
 
-	if err := cfg.PreCheck(); err != nil {
+	if err := cfg.preCheck(); err != nil {
 		return nil, err
 	}
 
