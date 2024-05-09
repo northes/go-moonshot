@@ -18,9 +18,9 @@ func TestChat(t *testing.T) {
 	ctx := context.Background()
 
 	builder := moonshot.NewChatCompletionsBuilder()
-	builder.AppendPrompt("你是 Kimi，由 Moonshot AI 提供的人工智能助手，你更擅长中文和英文的对话。你会为用户提供安全，有帮助，准确的回答。同时，你会拒绝一切涉及恐怖主义，种族歧视，黄色暴力等问题的回答。Moonshot AI 为专有名词，不可翻译成其他语言。").
-		AppendUser("你好，我叫李雷，1+1等于多少？").
-		WithTemperature(0.3)
+	builder.AddPrompt("你是 Kimi，由 Moonshot AI 提供的人工智能助手，你更擅长中文和英文的对话。你会为用户提供安全，有帮助，准确的回答。同时，你会拒绝一切涉及恐怖主义，种族歧视，黄色暴力等问题的回答。Moonshot AI 为专有名词，不可翻译成其他语言。").
+		AddUserContent("你好，我叫李雷，1+1等于多少？").
+		SetTemperature(0.3)
 
 	resp, err := cli.Chat().Completions(ctx, builder.ToRequest())
 	if err != nil {
@@ -39,9 +39,9 @@ func TestChatStream(t *testing.T) {
 	}
 
 	builder := moonshot.NewChatCompletionsBuilder()
-	builder.WithModel(moonshot.ModelMoonshotV18K).
-		AppendUser("你好，我叫李雷，1+1等于多少？").
-		WithStream()
+	builder.SetModel(moonshot.ModelMoonshotV18K).
+		AddUserContent("你好，我叫李雷，1+1等于多少？").
+		SetStream()
 
 	resp, err := cli.Chat().CompletionsStream(context.Background(), builder.ToRequest())
 	if err != nil {
@@ -77,9 +77,9 @@ func TestChatWithContext(t *testing.T) {
 	ctx := context.Background()
 
 	builder := moonshot.NewChatCompletionsBuilder()
-	builder.AppendPrompt("你是 Kimi，由 Moonshot AI 提供的人工智能助手，你更擅长中文和英文的对话。你会为用户提供安全，有帮助，准确的回答。同时，你会拒绝一切涉及恐怖主义，种族歧视，黄色暴力等问题的回答。Moonshot AI 为专有名词，不可翻译成其他语言。").
-		AppendUser("你好，我叫李雷，1+1等于多少？").
-		WithTemperature(0.3)
+	builder.AddPrompt("你是 Kimi，由 Moonshot AI 提供的人工智能助手，你更擅长中文和英文的对话。你会为用户提供安全，有帮助，准确的回答。同时，你会拒绝一切涉及恐怖主义，种族歧视，黄色暴力等问题的回答。Moonshot AI 为专有名词，不可翻译成其他语言。").
+		AddUserContent("你好，我叫李雷，1+1等于多少？").
+		SetTemperature(0.3)
 
 	resp, err := cli.Chat().Completions(ctx, builder.ToRequest())
 	if err != nil {
@@ -88,10 +88,10 @@ func TestChatWithContext(t *testing.T) {
 	t.Log(test.MarshalJsonToStringX(resp))
 
 	for _, choice := range resp.Choices {
-		builder.AppendMessage(choice.Message)
+		builder.AddMessage(choice.Message)
 	}
 
-	builder.AppendUser("在这个基础上再加3等于多少")
+	builder.AddUserContent("在这个基础上再加3等于多少")
 
 	resp, err = cli.Chat().Completions(ctx, builder.ToRequest())
 	if err != nil {
