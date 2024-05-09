@@ -6,6 +6,7 @@ import (
 	"github.com/northes/go-moonshot/internal/httpx"
 )
 
+// ResponseToError bind and return error from response
 func ResponseToError(resp *httpx.Response) error {
 	errResp := new(CommonAPIResponse)
 	err := resp.Unmarshal(errResp)

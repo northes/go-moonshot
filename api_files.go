@@ -23,6 +23,7 @@ type files struct {
 	client *Client
 }
 
+// Files returns a new files controller
 func (c *Client) Files() IFiles {
 	return &files{
 		client: c,
@@ -45,6 +46,7 @@ type FilesUploadResponse struct {
 	StatusDetails string `json:"status_details"`
 }
 
+// Upload uploads a file to the server
 func (f *files) Upload(ctx context.Context, req *FilesUploadRequest) (*FilesUploadResponse, error) {
 	const path = "/v1/files"
 
@@ -107,6 +109,7 @@ type FilesUploadBytesResponse struct {
 	StatusDetails string `json:"status_details"`
 }
 
+// UploadBytes uploads a file to the server with bytes
 func (f *files) UploadBytes(ctx context.Context, req *FilesUploadBytesRequest) (*FilesUploadBytesResponse, error) {
 	const path = "/v1/files"
 
@@ -164,6 +167,7 @@ type FilesListResponseData struct {
 	StatusDetail string       `json:"status_detail"`
 }
 
+// List lists all files
 func (f *files) List(ctx context.Context) (*FilesListResponse, error) {
 	const path = "/v1/files"
 	resp, err := f.client.HTTPClient().SetPath(path).Get(ctx)
@@ -187,6 +191,7 @@ type FilesDeleteResponse struct {
 	Object  string `json:"object"`
 }
 
+// Delete a file
 func (f *files) Delete(ctx context.Context, fileID string) (*FilesDeleteResponse, error) {
 	const path = "/v1/files/%s"
 	fullPath := fmt.Sprintf(path, fileID)
@@ -213,6 +218,7 @@ type FilesBatchDeleteResponse struct {
 	ErrorList []error                `json:"error_list"`
 }
 
+// BatchDelete deletes multiple files
 func (f *files) BatchDelete(ctx context.Context, req *FilesBatchDeleteRequest) (*FilesBatchDeleteResponse, error) {
 	if req == nil || len(req.FileIDList) == 0 {
 		return nil, fmt.Errorf("batch delete request must contain at least one file id")
@@ -244,6 +250,7 @@ type FilesInfoResponse struct {
 	StatusDetails string `json:"status_details"`
 }
 
+// Info returns information about a file
 func (f *files) Info(ctx context.Context, fileID string) (*FilesInfoResponse, error) {
 	const path = "/v1/files/%s"
 	fullPath := fmt.Sprintf(path, fileID)
@@ -270,6 +277,7 @@ type FileContentResponse struct {
 	Type     string `json:"type"`
 }
 
+// Content returns the content of a file
 func (f *files) Content(ctx context.Context, fileID string) (*FileContentResponse, error) {
 	const path = "/v1/files/%s/content"
 	fullPath := fmt.Sprintf(path, fileID)

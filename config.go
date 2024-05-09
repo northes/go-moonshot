@@ -19,6 +19,7 @@ func newConfigDefault() *Config {
 	}
 }
 
+// NewConfig creates a new config
 func NewConfig(opts ...Option) *Config {
 	cfg := newConfigDefault()
 	for _, opt := range opts {
@@ -27,7 +28,7 @@ func NewConfig(opts ...Option) *Config {
 	return cfg
 }
 
-func (c *Config) PreCheck() error {
+func (c *Config) preCheck() error {
 	if len(c.APIKey) == 0 {
 		return errors.New("API key is required")
 	}
@@ -36,12 +37,14 @@ func (c *Config) PreCheck() error {
 
 type Option func(*Config)
 
+// WithHost sets the host
 func WithHost(host string) Option {
 	return func(c *Config) {
 		c.Host = strings.TrimSuffix(host, "/")
 	}
 }
 
+// WithAPIKey sets the API key
 func WithAPIKey(key string) Option {
 	return func(c *Config) {
 		c.APIKey = key

@@ -9,6 +9,7 @@ type Client struct {
 	cfg *Config
 }
 
+// NewClient creates a new client
 func NewClient(key string) (*Client, error) {
 	cfg := NewConfig(
 		WithAPIKey(key),
@@ -21,6 +22,7 @@ func NewClient(key string) (*Client, error) {
 	return NewClientWithConfig(cfg)
 }
 
+// NewClientWithConfig creates a new client with a custom configuration
 func NewClientWithConfig(cfg *Config) (*Client, error) {
 	if cfg == nil {
 		cfg = newConfigDefault()
@@ -37,6 +39,7 @@ func NewClientWithConfig(cfg *Config) (*Client, error) {
 	return c, nil
 }
 
+// HTTPClient returns a new http client
 func (c *Client) HTTPClient() *httpx.Client {
 	return httpx.NewClient(c.cfg.Host).AddHeader(tools.AuthorizationHeaderKey, tools.ToBearToken(c.cfg.APIKey))
 }

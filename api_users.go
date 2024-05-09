@@ -10,6 +10,7 @@ type users struct {
 	client *Client
 }
 
+// Users returns a new users controller
 func (c *Client) Users() IUsers {
 	return &users{client: c}
 }
@@ -29,6 +30,7 @@ type UsersBalanceResponseData struct {
 	CashBalance float64 `json:"cash_balance"`
 }
 
+// Balance returns the user's balance
 func (u *users) Balance(ctx context.Context) (*UsersBalanceResponse, error) {
 	const path = "/v1/users/me/balance"
 	resp, err := u.client.HTTPClient().SetPath(path).Get(ctx)

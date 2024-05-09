@@ -12,6 +12,7 @@ type models struct {
 	client *Client
 }
 
+// Models returns a new models controller
 func (c *Client) Models() IModels {
 	return &models{
 		client: c,
@@ -52,6 +53,7 @@ type ListModelsResponseDataPermission struct {
 	IsBlocking         bool   `json:"is_blocking"`
 }
 
+// List lists all models
 func (m *models) List(ctx context.Context) (*ListModelsResponse, error) {
 	const path = "/v1/models"
 	resp, err := m.client.HTTPClient().SetPath(path).Get(ctx)

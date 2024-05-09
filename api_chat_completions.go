@@ -20,6 +20,7 @@ type chat struct {
 	client *Client
 }
 
+// Chat returns a new chat controller
 func (c *Client) Chat() IChat {
 	return &chat{
 		client: c,
@@ -70,7 +71,7 @@ type ChatCompletionsResponseUsage struct {
 	TotalTokens      int `json:"total_tokens"`
 }
 
-// Completions return the conversation at one time
+// Completions sends a request to the chat completions endpoint
 func (c *chat) Completions(ctx context.Context, req *ChatCompletionsRequest) (*ChatCompletionsResponse, error) {
 	const path = "/v1/chat/completions"
 	req.Stream = false
@@ -99,7 +100,7 @@ type ChatCompletionsStreamResponseReceive struct {
 	err        error
 }
 
-// CompletionsStream streaming back conversation content
+// CompletionsStream sends a request to the chat completions endpoint with stream
 func (c *chat) CompletionsStream(ctx context.Context, req *ChatCompletionsRequest) (*ChatCompletionsStreamResponse, error) {
 	const path = "/v1/chat/completions"
 
@@ -118,6 +119,7 @@ func (c *chat) CompletionsStream(ctx context.Context, req *ChatCompletionsReques
 	return streamResp, nil
 }
 
+// Receive returns a channel to receive messages from the stream
 func (c *ChatCompletionsStreamResponse) Receive() <-chan *ChatCompletionsStreamResponseReceive {
 	receiveCh := make(chan *ChatCompletionsStreamResponseReceive, 1)
 	reader := bufio.NewReader(c.resp.Raw().Body)
@@ -188,6 +190,7 @@ func (c *ChatCompletionsStreamResponse) sendWithFinish(ch chan<- *ChatCompletion
 	}
 }
 
+// GetMessage returns the message from the stream
 func (c *ChatCompletionsStreamResponseReceive) GetMessage() (*ChatCompletionsMessage, error) {
 	if c.err != nil {
 		return nil, c.err
