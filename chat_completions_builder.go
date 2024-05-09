@@ -19,7 +19,9 @@ type chatCompletionsBuilder struct {
 }
 
 func NewChatCompletionsBuilder(req ...*ChatCompletionsRequest) IChatCompletionsBuilder {
-	builder := new(chatCompletionsBuilder)
+	builder := &chatCompletionsBuilder{
+		req: &ChatCompletionsRequest{},
+	}
 
 	if len(req) > 0 && req[0] != nil {
 		builder.req = req[0]
