@@ -30,6 +30,8 @@ func (c *Client) Chat() IChat {
 type ChatCompletionsMessage struct {
 	Role    ChatCompletionsMessageRole `json:"role"`
 	Content string                     `json:"content"`
+	Partial bool                       `json:"partial,omitempty"`
+	Name    string                     `json:"name,omitempty"`
 }
 
 type ChatCompletionsRequest struct {
@@ -88,6 +90,19 @@ func (c *chat) Completions(ctx context.Context, req *ChatCompletionsRequest) (*C
 		return nil, err
 	}
 	return chatCompletionsResp, nil
+}
+
+func (c *ChatCompletionsResponse) GetMessage() (*ChatCompletionsMessage, error) {
+	if len(c.Choices) == 0 {
+		return nil, fmt.Errorf("empty choices")
+	}
+	for _, choice := range c.Choices {
+		if choice.Message != nil {
+			return choice.Message, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no such choice")
 }
 
 type ChatCompletionsStreamResponse struct {
