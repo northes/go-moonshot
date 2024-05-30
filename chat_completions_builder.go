@@ -3,7 +3,7 @@ package moonshot
 type IChatCompletionsBuilder interface {
 	AddUserContent(content string) IChatCompletionsBuilder
 	AddSystemContent(content string) IChatCompletionsBuilder
-	AddAssistantContent(content string) IChatCompletionsBuilder
+	AddAssistantContent(content string, partialMode ...bool) IChatCompletionsBuilder
 	AddPrompt(prompt string) IChatCompletionsBuilder
 	AddMessage(message *ChatCompletionsMessage) IChatCompletionsBuilder
 
@@ -66,11 +66,17 @@ func (c *chatCompletionsBuilder) AddSystemContent(content string) IChatCompletio
 	return c
 }
 
-// AddAssistantContent adds a message with the role of assistant
-func (c *chatCompletionsBuilder) AddAssistantContent(content string) IChatCompletionsBuilder {
+// AddAssistantContent add a message with the role of assistant, and partial mode
+func (c *chatCompletionsBuilder) AddAssistantContent(content string, partialMode ...bool) IChatCompletionsBuilder {
+	var partial bool
+	if len(partialMode) == 1 {
+		partial = partialMode[0]
+	}
+
 	c.req.Messages = append(c.req.Messages, &ChatCompletionsMessage{
 		Role:    RoleAssistant,
 		Content: content,
+		Partial: partial,
 	})
 	return c
 }
