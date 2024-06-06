@@ -6,6 +6,7 @@ const (
 	RoleSystem    ChatCompletionsMessageRole = "system"
 	RoleUser      ChatCompletionsMessageRole = "user"
 	RoleAssistant ChatCompletionsMessageRole = "assistant"
+	RoleTool      ChatCompletionsMessageRole = "tool"
 )
 
 func (c ChatCompletionsMessageRole) String() string {
@@ -27,8 +28,9 @@ func (c ChatCompletionsModelID) String() string {
 type ChatCompletionsFinishReason string
 
 const (
-	FinishReasonStop   ChatCompletionsFinishReason = "stop"
-	FinishReasonLength ChatCompletionsFinishReason = "length"
+	FinishReasonStop      ChatCompletionsFinishReason = "stop"
+	FinishReasonLength    ChatCompletionsFinishReason = "length"
+	FinishReasonToolCalls ChatCompletionsFinishReason = "tool_calls"
 )
 
 func (c ChatCompletionsFinishReason) String() string {

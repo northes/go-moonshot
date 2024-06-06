@@ -32,6 +32,10 @@ type ChatCompletionsMessage struct {
 	Content string                     `json:"content"`
 	Partial bool                       `json:"partial,omitempty"`
 	Name    string                     `json:"name,omitempty"`
+	// returns only in use tool response
+	ToolCalls []*ChatCompletionsResponseToolCalls `json:"tool_calls,omitempty"`
+	// use tool request need it
+	ToolCallID string `json:"tool_call_id,omitempty"`
 }
 
 type ChatCompletionsRequest struct {
@@ -45,6 +49,8 @@ type ChatCompletionsRequest struct {
 	FrequencyPenalty float64                   `json:"frequency_penalty"`
 	Stop             []string                  `json:"stop"`
 	Stream           bool                      `json:"stream"`
+	// When you use a tool, you need to define it
+	Tools []*ChatCompletionsTool `json:"tools,omitempty"`
 }
 
 type ChatCompletionsResponse struct {
