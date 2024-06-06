@@ -2,6 +2,7 @@ package moonshot_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/northes/go-moonshot"
+	"github.com/northes/go-moonshot/internal/httpx"
 	"github.com/northes/go-moonshot/test"
 	"github.com/stretchr/testify/require"
 )
@@ -142,63 +144,98 @@ func TestUseTools(t *testing.T) {
 	ctx := context.Background()
 
 	const functionName = "locate_the_ip_address"
+	const ip = "15.202.141.157"
 
 	builder := moonshot.NewChatCompletionsBuilder()
-	builder.AddUserContent("IP地址`101.44.81.163`的定位是哪里？")
-	req := builder.ToRequest()
-	req.Tools = []*moonshot.ChatCompletionsTool{
-		{
-			Type: "function",
-			Function: &moonshot.ChatCompletionsToolFunction{
-				Name:        functionName,
-				Description: "定位IP地址，查询传入的IP地址的位置信息",
-				Parameters: &moonshot.ChatCompletionsToolFunctionParameters{
-					Type: "object",
-					Properties: map[string]*moonshot.ChatCompletionsToolFunctionProperties{
-						"ip_address": {
-							Type:        "string",
-							Description: "IP地址",
-						},
+	builder.AddUserContent(fmt.Sprintf("IP地址`%s`的定位是哪里？", ip))
+	builder.SetTool(&moonshot.ChatCompletionsTool{
+		Type: "function",
+		Function: &moonshot.ChatCompletionsToolFunction{
+			Name:        functionName,
+			Description: "定位IP地址，查询传入的IP地址的位置信息",
+			Parameters: &moonshot.ChatCompletionsToolFunctionParameters{
+				Type: "object",
+				Properties: map[string]*moonshot.ChatCompletionsToolFunctionProperties{
+					"ip_address": {
+						Type:        "string",
+						Description: "IP地址",
 					},
 				},
 			},
 		},
-	}
+	})
 
-	t.Logf("request: %v", test.MarshalJsonToStringX(req))
-
-	resp, err := cli.Chat().Completions(ctx, req)
+	resp, err := cli.Chat().Completions(ctx, builder.ToRequest())
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	// check tool calls
 	if len(resp.Choices) != 0 {
 		if resp.Choices[0].FinishReason == moonshot.FinishReasonToolCalls {
 			for _, toolCall := range resp.Choices[0].Message.ToolCalls {
-				t.Logf("tool calls: %v", test.MarshalJsonToStringX(toolCall))
+				t.Logf("should tool calls: %v", test.MarshalJsonToStringX(toolCall))
+				if strings.HasPrefix(toolCall.ID, functionName) {
+					// tool calls
+					ipInfo, err := IPLocate(ip)
+					if err != nil {
+						t.Fatal(err)
+					}
+					b, err := json.Marshal(ipInfo)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					builder.AddMessageFromChoices(resp.Choices)
+
+					t.Logf("tool calls result: %s", test.MarshalJsonToStringX(ipInfo))
+
+					builder.AddToolContent(string(b), functionName, resp.Choices[0].Message.ToolCalls[0].ID)
+				}
 			}
 		}
 	}
 
-	req.Messages = append(req.Messages, resp.Choices[0].Message)
-
-	functionMessage := &moonshot.ChatCompletionsMessage{
-		Role:       moonshot.RoleTool,
-		Content:    "{\"ip\":\"101.44.82.202\",\"country\":\"中国\",\"province\":\"上海市\",\"city\":\"上海市\",\"district\":\"\",\"isp\":\"\",\"location\":\"121.472644,31.231706\",\"source\":\"gaode\",\"cache_time\":\"2024-06-06T10:17:52.136805116Z\"}",
-		Partial:    false,
-		Name:       functionName,
-		ToolCallID: resp.Choices[0].Message.ToolCalls[0].ID,
-	}
-
-	req.Messages = append(req.Messages, functionMessage)
-
-	t.Logf("request: %v", test.MarshalJsonToStringX(req))
-
-	resp, err = cli.Chat().Completions(ctx, req)
+	resp, err = cli.Chat().Completions(ctx, builder.ToRequest())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	t.Log(test.MarshalJsonToStringX(resp))
-	// {"id":"chatcmpl-cc0e86cad1d242afb79b12c114f5aa67","object":"chat.completion","created":1717669949,"model":"moonshot-v1-8k","choices":[{"index":0,"message":{"role":"assistant","content":"IP地址`101.44.81.163`的定位结果显示，该IP地址位于中国上海市。具体位置的经纬度坐标为东经121.472644度，北纬31.231706度。该信息来源于高德地图，最后更新时间为2024年6月6日。请注意，IP地址定位可能存在一定的误差，并且实际位置可能与显示的行政区划不完全一致。"},"finish_reason":"stop"}],"usage":{"prompt_tokens":222,"completion_tokens":90,"total_tokens":312}}
+	finalMessage, err := resp.GetMessage()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(test.MarshalJsonToStringX(finalMessage.Content))
+	// IP地址`15.202.141.157`的定位结果显示，该IP地址位于美国华盛顿州，属于Amazon.com。具体的城市信息没有提供，但经纬度坐标为(-95.71289, 37.090245)。这些信息来源于高德地图，最后更新时间为2024年6月6日。
+}
+
+type IPLocateInfo struct {
+	IP        string `json:"ip"`
+	Country   string `json:"country"`
+	Province  string `json:"province"`
+	City      string `json:"city"`
+	District  string `json:"district"`
+	ISP       string `json:"isp"`
+	Location  string `json:"location"`
+	Source    string `json:"source"`
+	CacheTime string `json:"cache_time"`
+}
+type IPLocateInfoResponse struct {
+	Data *IPLocateInfo `json:"data"`
+}
+
+func IPLocate(ip string) (*IPLocateInfo, error) {
+	response, err := httpx.NewClient(fmt.Sprintf("https://apihut.co/ip/%s", ip)).Get(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	respData := new(IPLocateInfoResponse)
+	err = response.Unmarshal(respData)
+	if err != nil {
+		return nil, err
+	}
+
+	return respData.Data, nil
 }
