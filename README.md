@@ -75,7 +75,7 @@ if !ok {
 
 cli, err := moonshot.NewClientWithConfig(
     moonshot.NewConfig(
-        moonshot.WithAPIKey("xxxx"),
+        moonshot.WithAPIKey(key),
     ),
 )
 ```

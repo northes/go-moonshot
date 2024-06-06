@@ -55,6 +55,13 @@ func TestChatStream(t *testing.T) {
 		msg, err := receive.GetMessage()
 		if err != nil {
 			if errors.Is(err, io.EOF) {
+				// Finish usage
+				if len(receive.Choices) != 0 {
+					choice := receive.Choices[0]
+					if choice.FinishReason == moonshot.FinishReasonStop && choice.Usage != nil {
+						t.Logf("Finish Usage: PromptTokens: %d, CompletionTokens: %d, TotalTokens: %d", choice.Usage.PromptTokens, choice.Usage.CompletionTokens, choice.Usage.TotalTokens)
+					}
+				}
 				break
 			}
 			t.Error(err)
@@ -68,7 +75,6 @@ func TestChatStream(t *testing.T) {
 		default:
 			t.Logf("Role: %s,Content: %s", msg.Role, msg.Content)
 		}
-
 	}
 }
 

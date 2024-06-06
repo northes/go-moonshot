@@ -53,7 +53,8 @@ type ChatCompletionsResponse struct {
 	Created int                               `json:"created"`
 	Model   string                            `json:"model"`
 	Choices []*ChatCompletionsResponseChoices `json:"choices"`
-	Usage   *ChatCompletionsResponseUsage     `json:"usage"`
+	// returns only in non-stream mode
+	Usage *ChatCompletionsResponseUsage `json:"usage,omitempty"`
 }
 
 type ChatCompletionsResponseChoices struct {
@@ -65,6 +66,9 @@ type ChatCompletionsResponseChoices struct {
 	Delta *ChatCompletionsMessage `json:"delta,omitempty"`
 
 	FinishReason ChatCompletionsFinishReason `json:"finish_reason"`
+
+	// returns only in stream mode
+	Usage *ChatCompletionsResponseUsage `json:"usage,omitempty"`
 }
 
 type ChatCompletionsResponseUsage struct {
