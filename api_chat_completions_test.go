@@ -149,12 +149,12 @@ func TestUseTools(t *testing.T) {
 	builder := moonshot.NewChatCompletionsBuilder()
 	builder.AddUserContent(fmt.Sprintf("IP地址`%s`的定位是哪里？", ip))
 	builder.SetTool(&moonshot.ChatCompletionsTool{
-		Type: "function",
+		Type: moonshot.ChatCompletionsToolTypeFunction,
 		Function: &moonshot.ChatCompletionsToolFunction{
 			Name:        functionName,
 			Description: "定位IP地址，查询传入的IP地址的位置信息",
 			Parameters: &moonshot.ChatCompletionsToolFunctionParameters{
-				Type: "object",
+				Type: moonshot.ChatCompletionsParametersTypeObject,
 				Properties: map[string]*moonshot.ChatCompletionsToolFunctionProperties{
 					"ip_address": {
 						Type:        "string",

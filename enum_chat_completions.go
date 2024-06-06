@@ -36,3 +36,23 @@ const (
 func (c ChatCompletionsFinishReason) String() string {
 	return string(c)
 }
+
+type ChatCompletionsToolType string
+
+const (
+	ChatCompletionsToolTypeFunction ChatCompletionsToolType = "function"
+)
+
+func (c ChatCompletionsToolType) String() string {
+	return string(c)
+}
+
+type ChatCompletionsParametersType string
+
+const (
+	ChatCompletionsParametersTypeObject ChatCompletionsParametersType = "object"
+)
+
+func (c ChatCompletionsParametersType) String() string {
+	return string(c)
+}

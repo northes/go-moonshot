@@ -1,7 +1,7 @@
 package moonshot
 
 type ChatCompletionsTool struct {
-	Type     string                       `json:"type"`
+	Type     ChatCompletionsToolType      `json:"type"`
 	Function *ChatCompletionsToolFunction `json:"function"`
 }
 
@@ -12,7 +12,7 @@ type ChatCompletionsToolFunction struct {
 }
 
 type ChatCompletionsToolFunctionParameters struct {
-	Type       string                                            `json:"type"`
+	Type       ChatCompletionsParametersType                     `json:"type"`
 	Properties map[string]*ChatCompletionsToolFunctionProperties `json:"properties"`
 	Required   []string                                          `json:"required,omitempty"`
 }
