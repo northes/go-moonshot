@@ -16,7 +16,7 @@ by [MoonshotAI](https://moonshot.cn).
 ## 🚀 Installation
 
 ```bash
-go get github.com/northes/go-moonshot@v0.4.2
+go get github.com/northes/go-moonshot@v0.4.3
 ```
 
 You can find the docs at [go docs](https://pkg.go.dev/github.com/northes/go-moonshot).
