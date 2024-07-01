@@ -4,8 +4,10 @@ type IChatCompletionsBuilder interface {
 	AddUserContent(content string) IChatCompletionsBuilder
 	AddSystemContent(content string) IChatCompletionsBuilder
 	AddAssistantContent(content string, partialMode ...bool) IChatCompletionsBuilder
+	AddToolContent(content, name, toolCallID string) IChatCompletionsBuilder
 	AddPrompt(prompt string) IChatCompletionsBuilder
 	AddMessage(message *ChatCompletionsMessage) IChatCompletionsBuilder
+	AddMessageFromChoices(choices []*ChatCompletionsResponseChoices) IChatCompletionsBuilder
 
 	SetModel(model ChatCompletionsModelID) IChatCompletionsBuilder
 	SetTemperature(temperature float64) IChatCompletionsBuilder
@@ -16,6 +18,8 @@ type IChatCompletionsBuilder interface {
 	SetPresencePenalty(num float64) IChatCompletionsBuilder
 	SetFrequencyPenalty(num float64) IChatCompletionsBuilder
 	SetStop(stop []string) IChatCompletionsBuilder
+	SetTool(tool *ChatCompletionsTool) IChatCompletionsBuilder
+	SetTools(tools []*ChatCompletionsTool) IChatCompletionsBuilder
 
 	ToRequest() *ChatCompletionsRequest
 }
@@ -81,6 +85,31 @@ func (c *chatCompletionsBuilder) AddAssistantContent(content string, partialMode
 	return c
 }
 
+func (c *chatCompletionsBuilder) AddToolContent(content, name, toolCallID string) IChatCompletionsBuilder {
+	c.req.Messages = append(c.req.Messages, &ChatCompletionsMessage{
+		Role:       RoleTool,
+		Content:    content,
+		Name:       name,
+		ToolCallID: toolCallID,
+	})
+	return c
+}
+
+func (c *chatCompletionsBuilder) AddMessageFromChoices(choices []*ChatCompletionsResponseChoices) IChatCompletionsBuilder {
+	if choices == nil {
+		return c
+	}
+	for _, choice := range choices {
+		if choice.Message != nil {
+			c.AddMessage(choice.Message)
+		}
+		if choice.Delta != nil {
+			c.AddMessage(choice.Delta)
+		}
+	}
+	return c
+}
+
 // AddPrompt is an alias of AddSystemContent
 func (c *chatCompletionsBuilder) AddPrompt(prompt string) IChatCompletionsBuilder {
 	return c.AddSystemContent(prompt)
@@ -143,6 +172,23 @@ func (c *chatCompletionsBuilder) SetStop(stop []string) IChatCompletionsBuilder 
 // SetStream sets the stream of the request
 func (c *chatCompletionsBuilder) SetStream(enable bool) IChatCompletionsBuilder {
 	c.req.Stream = enable
+	return c
+}
+
+// SetTool set up a tool of the request
+func (c *chatCompletionsBuilder) SetTool(tool *ChatCompletionsTool) IChatCompletionsBuilder {
+	if c.req.Tools == nil {
+		c.req.Tools = make([]*ChatCompletionsTool, 0)
+	}
+	c.req.Tools = append(c.req.Tools, tool)
+	return c
+}
+
+// SetTools set up some tools of the request
+func (c *chatCompletionsBuilder) SetTools(tools []*ChatCompletionsTool) IChatCompletionsBuilder {
+	for _, tool := range tools {
+		c.SetTool(tool)
+	}
 	return c
 }
 

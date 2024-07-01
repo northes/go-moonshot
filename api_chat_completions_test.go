@@ -2,6 +2,7 @@ package moonshot_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/northes/go-moonshot"
+	"github.com/northes/go-moonshot/internal/httpx"
 	"github.com/northes/go-moonshot/test"
 	"github.com/stretchr/testify/require"
 )
@@ -138,4 +140,108 @@ func TestPartialMode(t *testing.T) {
 	jsonStr := fmt.Sprintf("%s%s", leadingText, message.Content)
 
 	t.Log(jsonStr)
+}
+
+func TestUseTools(t *testing.T) {
+	cli, err := NewTestClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+
+	const functionName = "locate_the_ip_address"
+	const ip = "15.202.141.157"
+
+	builder := moonshot.NewChatCompletionsBuilder()
+	builder.AddUserContent(fmt.Sprintf("IP地址`%s`的定位是哪里？", ip))
+	builder.SetTool(&moonshot.ChatCompletionsTool{
+		Type: moonshot.ChatCompletionsToolTypeFunction,
+		Function: &moonshot.ChatCompletionsToolFunction{
+			Name:        functionName,
+			Description: "定位IP地址，查询传入的IP地址的位置信息",
+			Parameters: &moonshot.ChatCompletionsToolFunctionParameters{
+				Type: moonshot.ChatCompletionsParametersTypeObject,
+				Properties: map[string]*moonshot.ChatCompletionsToolFunctionProperties{
+					"ip_address": {
+						Type:        "string",
+						Description: "IP地址",
+					},
+				},
+			},
+		},
+	})
+
+	resp, err := cli.Chat().Completions(ctx, builder.ToRequest())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// check tool calls
+	if len(resp.Choices) != 0 {
+		if resp.Choices[0].FinishReason == moonshot.FinishReasonToolCalls {
+			for _, toolCall := range resp.Choices[0].Message.ToolCalls {
+				t.Logf("should tool calls: %v", test.MarshalJsonToStringX(toolCall))
+				if strings.HasPrefix(toolCall.ID, functionName) {
+					// tool calls
+					ipInfo, err := IPLocate(ip)
+					if err != nil {
+						t.Fatal(err)
+					}
+					b, err := json.Marshal(ipInfo)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					builder.AddMessageFromChoices(resp.Choices)
+
+					t.Logf("tool calls result: %s", test.MarshalJsonToStringX(ipInfo))
+
+					builder.AddToolContent(string(b), functionName, resp.Choices[0].Message.ToolCalls[0].ID)
+				}
+			}
+		}
+	}
+
+	resp, err = cli.Chat().Completions(ctx, builder.ToRequest())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	finalMessage, err := resp.GetMessage()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(test.MarshalJsonToStringX(finalMessage.Content))
+	// IP地址`15.202.141.157`的定位结果显示，该IP地址位于美国华盛顿州，属于Amazon.com。具体的城市信息没有提供，但经纬度坐标为(-95.71289, 37.090245)。这些信息来源于高德地图，最后更新时间为2024年6月6日。
+}
+
+type IPLocateInfo struct {
+	IP        string `json:"ip"`
+	Country   string `json:"country"`
+	Province  string `json:"province"`
+	City      string `json:"city"`
+	District  string `json:"district"`
+	ISP       string `json:"isp"`
+	Location  string `json:"location"`
+	Source    string `json:"source"`
+	CacheTime string `json:"cache_time"`
+}
+type IPLocateInfoResponse struct {
+	Data *IPLocateInfo `json:"data"`
+}
+
+func IPLocate(ip string) (*IPLocateInfo, error) {
+	response, err := httpx.NewClient(fmt.Sprintf("https://apihut.co/ip/%s", ip)).Get(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	respData := new(IPLocateInfoResponse)
+	err = response.Unmarshal(respData)
+	if err != nil {
+		return nil, err
+	}
+
+	return respData.Data, nil
 }

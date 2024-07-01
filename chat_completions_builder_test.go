@@ -17,6 +17,8 @@ func TestNewChatCompletionsBuilder(t *testing.T) {
 		promptContent    = "你是 Kimi，由 Moonshot AI 提供的人工智能助手，你更擅长中文和英文的对话。你会为用户提供安全，有帮助，准确的回答。同时，你会拒绝一切涉及恐怖主义，种族歧视，黄色暴力等问题的回答。Moonshot AI 为专有名词，不可翻译成其他语言。"
 		userContent      = "你好，我叫李雷，1+1等于多少？"
 		assistantContent = "我是小助手！"
+		functionName1    = "function1"
+		functionName2    = "function2"
 	)
 
 	wantedReq := &moonshot.ChatCompletionsRequest{
@@ -47,6 +49,24 @@ func TestNewChatCompletionsBuilder(t *testing.T) {
 		FrequencyPenalty: 1.5,
 		Stop:             []string{"结束"},
 		Stream:           true,
+		Tools: []*moonshot.ChatCompletionsTool{{
+			Type: moonshot.ChatCompletionsToolTypeFunction,
+			Function: &moonshot.ChatCompletionsToolFunction{
+				Name:        functionName1,
+				Description: "",
+				Parameters:  nil,
+			},
+		}, {
+			Type: moonshot.ChatCompletionsToolTypeFunction,
+			Function: &moonshot.ChatCompletionsToolFunction{
+				Name: functionName2,
+			},
+		}, {
+			Type: moonshot.ChatCompletionsToolTypeFunction,
+			Function: &moonshot.ChatCompletionsToolFunction{
+				Name: functionName2,
+			},
+		}},
 	}
 
 	builder.AddPrompt(promptContent).
@@ -64,7 +84,31 @@ func TestNewChatCompletionsBuilder(t *testing.T) {
 		SetPresencePenalty(1.2).
 		SetFrequencyPenalty(1.5).
 		SetStop([]string{"结束"}).
-		SetStream(true)
+		SetStream(true).
+		SetTool(&moonshot.ChatCompletionsTool{
+			Type: moonshot.ChatCompletionsToolTypeFunction,
+			Function: &moonshot.ChatCompletionsToolFunction{
+				Name:        functionName1,
+				Description: "",
+				Parameters:  nil,
+			},
+		}).SetTools([]*moonshot.ChatCompletionsTool{
+		{
+			Type: moonshot.ChatCompletionsToolTypeFunction,
+			Function: &moonshot.ChatCompletionsToolFunction{
+				Name: functionName2,
+			},
+		},
+		{
+			Type: moonshot.ChatCompletionsToolTypeFunction,
+			Function: &moonshot.ChatCompletionsToolFunction{
+				Name: functionName2,
+			},
+		},
+	})
+
+	builder.SetTools(nil)
+	tt.Equal(wantedReq, builder.ToRequest())
 
 	tt.Equal(wantedReq, builder.ToRequest())
 	tt.NotEqual(wantedReq, builder.SetModel(moonshot.ModelMoonshotV1128K).ToRequest())
