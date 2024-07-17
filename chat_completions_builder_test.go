@@ -24,6 +24,10 @@ func TestNewChatCompletionsBuilder(t *testing.T) {
 	wantedReq := &moonshot.ChatCompletionsRequest{
 		Messages: []*moonshot.ChatCompletionsMessage{
 			{
+				Role:    moonshot.RoleContextCache,
+				Content: "tag=tag1;reset_ttl=3600;dry_run=1",
+			},
+			{
 				Role:    moonshot.RoleSystem,
 				Content: promptContent,
 			},
@@ -69,7 +73,11 @@ func TestNewChatCompletionsBuilder(t *testing.T) {
 		}},
 	}
 
-	builder.AddPrompt(promptContent).
+	builder.SetContextCacheContent(
+		moonshot.NewContextCacheContentWithTag("tag1").
+			WithResetTTL(3600).
+			WithDryRun(true)).
+		AddPrompt(promptContent).
 		AddUserContent(userContent).
 		AddAssistantContent(assistantContent).
 		AddMessage(&moonshot.ChatCompletionsMessage{
