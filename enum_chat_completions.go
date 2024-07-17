@@ -3,10 +3,11 @@ package moonshot
 type ChatCompletionsMessageRole string
 
 const (
-	RoleSystem    ChatCompletionsMessageRole = "system"
-	RoleUser      ChatCompletionsMessageRole = "user"
-	RoleAssistant ChatCompletionsMessageRole = "assistant"
-	RoleTool      ChatCompletionsMessageRole = "tool"
+	RoleSystem       ChatCompletionsMessageRole = "system"
+	RoleUser         ChatCompletionsMessageRole = "user"
+	RoleAssistant    ChatCompletionsMessageRole = "assistant"
+	RoleTool         ChatCompletionsMessageRole = "tool"
+	RoleContextCache ChatCompletionsMessageRole = "cache"
 )
 
 func (c ChatCompletionsMessageRole) String() string {
