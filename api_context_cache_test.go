@@ -141,3 +141,22 @@ func TestContextCache_List(t *testing.T) {
 
 	t.Log(test.MarshalJsonToStringX(response))
 }
+
+func TestContextCache_CreateTag(t *testing.T) {
+	cli, err := NewTestClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+
+	// Create
+	var createResponse *moonshot.ContextCacheCreateTagResponse
+	createResponse, err = cli.ContextCache().CreateTag(ctx, &moonshot.ContextCacheCreateTagRequest{
+		Tag:     "MyCacheTag",
+		CacheId: "cache-",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, "MyCacheTag", createResponse.Tag)
+}
