@@ -26,6 +26,16 @@ func (c ChatCompletionsModelID) String() string {
 	return string(c)
 }
 
+type ChatCompletionsModelFamily string
+
+const (
+	ModelFamilyMoonshotV1 ChatCompletionsModelFamily = "moonshot-v1"
+)
+
+func (c ChatCompletionsModelFamily) String() string {
+	return string(c)
+}
+
 type ChatCompletionsFinishReason string
 
 const (

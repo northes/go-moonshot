@@ -34,30 +34,30 @@ func (c *Client) ContextCache() IContextCache {
 
 // ContextCache is the cache of the context
 type ContextCache struct {
-	Id          string                   `json:"id"`          // 缓存的唯一标识
-	Status      ContextCacheStatus       `json:"status"`      // 缓存的状态
-	Object      string                   `json:"object"`      // 缓存的类型
-	CreatedAt   int64                    `json:"created_at"`  // 缓存的创建时间
-	ExpiredAt   int64                    `json:"expired_at"`  // 缓存的过期时间
-	Tokens      int                      `json:"tokens"`      // 缓存的 Token 数量
-	Model       ChatCompletionsModelID   `json:"model"`       // 缓存的模型组名称
-	Messages    []ChatCompletionsMessage `json:"messages"`    // 缓存的消息内容
-	Tools       []ChatCompletionsTool    `json:"tools"`       // 缓存使用的工具
-	Name        string                   `json:"name"`        // 缓存的名称
-	Description string                   `json:"description"` // 缓存的描述信息
-	Metadata    map[string]string        `json:"metadata"`    // 缓存的元信息
+	Id          string                     `json:"id"`          // 缓存的唯一标识
+	Status      ContextCacheStatus         `json:"status"`      // 缓存的状态
+	Object      string                     `json:"object"`      // 缓存的类型
+	CreatedAt   int64                      `json:"created_at"`  // 缓存的创建时间
+	ExpiredAt   int64                      `json:"expired_at"`  // 缓存的过期时间
+	Tokens      int                        `json:"tokens"`      // 缓存的 Token 数量
+	Model       ChatCompletionsModelFamily `json:"model"`       // 缓存的模型组名称
+	Messages    []ChatCompletionsMessage   `json:"messages"`    // 缓存的消息内容
+	Tools       []ChatCompletionsTool      `json:"tools"`       // 缓存使用的工具
+	Name        string                     `json:"name"`        // 缓存的名称
+	Description string                     `json:"description"` // 缓存的描述信息
+	Metadata    map[string]string          `json:"metadata"`    // 缓存的元信息
 }
 
 // ContextCacheCreateRequest is the request for creating a context cache
 type ContextCacheCreateRequest struct {
-	Model       ChatCompletionsModelID   `json:"model"`                 // 模型组（model family）名称
-	Messages    []ChatCompletionsMessage `json:"messages"`              // 消息内容
-	Tools       []ChatCompletionsTool    `json:"tools,omitempty"`       // 使用的工具
-	Name        string                   `json:"name,omitempty"`        // 缓存名称
-	Description string                   `json:"description,omitempty"` // 缓存描述信息
-	Metadata    map[string]string        `json:"metadata,omitempty"`    // 缓存的元信息
-	ExpiredAt   int64                    `json:"expired_at"`            // 缓存的过期时间
-	TTL         int64                    `json:"ttl,omitempty"`         // 缓存的有效期
+	Model       ChatCompletionsModelFamily `json:"model"`                 // 模型组（model family）名称
+	Messages    []ChatCompletionsMessage   `json:"messages"`              // 消息内容
+	Tools       []ChatCompletionsTool      `json:"tools,omitempty"`       // 使用的工具
+	Name        string                     `json:"name,omitempty"`        // 缓存名称
+	Description string                     `json:"description,omitempty"` // 缓存描述信息
+	Metadata    map[string]string          `json:"metadata,omitempty"`    // 缓存的元信息
+	ExpiredAt   int64                      `json:"expired_at"`            // 缓存的过期时间
+	TTL         int64                      `json:"ttl,omitempty"`         // 缓存的有效期
 }
 
 // ContextCacheCreateResponse is the response for creating a context cache
