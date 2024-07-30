@@ -162,6 +162,14 @@ for receive := range resp.Receive() {
 
 Feel free to open a new issue, or contact me.
 
+## 🥳  Contributors
+
+<a href="https://github.com/northes/go-moonshot/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=northes/go-moonshot" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
+
 ## 📘 License
 
 This is open-sourced library licensed under the [MIT license](LICENSE).
