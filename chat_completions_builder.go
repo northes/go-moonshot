@@ -20,6 +20,7 @@ type IChatCompletionsBuilder interface {
 	SetStop(stop []string) IChatCompletionsBuilder
 	SetTool(tool *ChatCompletionsTool) IChatCompletionsBuilder
 	SetTools(tools []*ChatCompletionsTool) IChatCompletionsBuilder
+	SetContextCacheContent(content *ContextCacheContent) IChatCompletionsBuilder
 
 	ToRequest() *ChatCompletionsRequest
 }
@@ -189,6 +190,27 @@ func (c *chatCompletionsBuilder) SetTools(tools []*ChatCompletionsTool) IChatCom
 	for _, tool := range tools {
 		c.SetTool(tool)
 	}
+	return c
+}
+
+func (c *chatCompletionsBuilder) SetContextCacheContent(content *ContextCacheContent) IChatCompletionsBuilder {
+	// 如果 content 为 nil，则不做任何操作
+	if content == nil {
+		return c
+	}
+	// 你必须把这个消息放在 messages 列表的第一位
+	if len(c.req.Messages) > 0 && c.req.Messages[0].Role == RoleContextCache {
+		// Update the cache message
+		c.req.Messages[0].Content = content.Content()
+	} else {
+		// Add a new cache message to the first
+		c.req.Messages = append([]*ChatCompletionsMessage{{
+			Role:    RoleContextCache,
+			Content: content.Content(),
+		}}, c.req.Messages...)
+	}
+	// tools 参数必须为 null（空数组也将视为有值）
+	c.req.Tools = nil
 	return c
 }
 

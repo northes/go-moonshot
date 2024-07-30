@@ -3,10 +3,11 @@ package moonshot
 type ChatCompletionsMessageRole string
 
 const (
-	RoleSystem    ChatCompletionsMessageRole = "system"
-	RoleUser      ChatCompletionsMessageRole = "user"
-	RoleAssistant ChatCompletionsMessageRole = "assistant"
-	RoleTool      ChatCompletionsMessageRole = "tool"
+	RoleSystem       ChatCompletionsMessageRole = "system"
+	RoleUser         ChatCompletionsMessageRole = "user"
+	RoleAssistant    ChatCompletionsMessageRole = "assistant"
+	RoleTool         ChatCompletionsMessageRole = "tool"
+	RoleContextCache ChatCompletionsMessageRole = "cache"
 )
 
 func (c ChatCompletionsMessageRole) String() string {
@@ -22,6 +23,16 @@ const (
 )
 
 func (c ChatCompletionsModelID) String() string {
+	return string(c)
+}
+
+type ChatCompletionsModelFamily string
+
+const (
+	ModelFamilyMoonshotV1 ChatCompletionsModelFamily = "moonshot-v1"
+)
+
+func (c ChatCompletionsModelFamily) String() string {
 	return string(c)
 }
 
