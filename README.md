@@ -13,6 +13,9 @@
 A Go SDK for [Kimi](https://kimi.moonshot.cn) which created
 by [MoonshotAI](https://moonshot.cn).
 
+> [!WARNING]  
+> This project is still actively developing, and the API may change with the release of the version. Please pay attention when you upgrade the version.
+
 ## 🚀 Installation
 
 ```bash
@@ -41,6 +44,8 @@ You can find the docs at [go docs](https://pkg.go.dev/github.com/northes/go-moon
 | Get File Contents       | ✅    |
 | Estimate Token Count    | ✅    |
 | User Balance            | ✅    |
+| Tool Use                | ✅    |
+| Context Cache           | ✅    |
 
 ## 🥪 Usage
 
@@ -49,7 +54,8 @@ You can find the docs at [go docs](https://pkg.go.dev/github.com/northes/go-moon
 1. Get a MoonshotAI API Key: [https://platform.moonshot.cn](https://platform.moonshot.cn).
 2. Set up key using a configuration file or environment variable.
 
-> :warning: Note: Your API key is sensitive information. Do not share it with anyone.
+> [!TIP]
+> Your API key is sensitive information. Do not share it with anyone.
 
 #### With Only Key
 
@@ -165,7 +171,7 @@ Feel free to open a new issue, or contact me.
 ## 🥳  Contributors
 
 <a href="https://github.com/northes/go-moonshot/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=northes/go-moonshot" />
+  <img src="https://contrib.rocks/image?repo=northes/go-moonshot"  alt="contributors"/>
 </a>
 
 Made with [contrib.rocks](https://contrib.rocks).
