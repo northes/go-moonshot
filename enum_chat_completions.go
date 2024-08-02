@@ -67,3 +67,14 @@ const (
 func (c ChatCompletionsParametersType) String() string {
 	return string(c)
 }
+
+type ChatCompletionsResponseFormatType string
+
+const (
+	ChatCompletionsResponseFormatJSONObject ChatCompletionsResponseFormatType = "json_object"
+	ChatCompletionsResponseFormatText       ChatCompletionsResponseFormatType = "text"
+)
+
+func (c ChatCompletionsResponseFormatType) String() string {
+	return string(c)
+}

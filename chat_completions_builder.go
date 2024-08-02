@@ -21,6 +21,7 @@ type IChatCompletionsBuilder interface {
 	SetTool(tool *ChatCompletionsTool) IChatCompletionsBuilder
 	SetTools(tools []*ChatCompletionsTool) IChatCompletionsBuilder
 	SetContextCacheContent(content *ContextCacheContent) IChatCompletionsBuilder
+	SetResponseFormat(format ChatCompletionsResponseFormatType) IChatCompletionsBuilder
 
 	ToRequest() *ChatCompletionsRequest
 }
@@ -211,6 +212,13 @@ func (c *chatCompletionsBuilder) SetContextCacheContent(content *ContextCacheCon
 	}
 	// tools 参数必须为 null（空数组也将视为有值）
 	c.req.Tools = nil
+	return c
+}
+
+func (c *chatCompletionsBuilder) SetResponseFormat(format ChatCompletionsResponseFormatType) IChatCompletionsBuilder {
+	c.req.ResponseFormat = &ChatCompletionsRequestResponseFormat{
+		Type: format,
+	}
 	return c
 }
 

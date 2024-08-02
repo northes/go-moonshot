@@ -3,8 +3,9 @@ package moonshot_test
 import (
 	"testing"
 
-	"github.com/northes/go-moonshot"
 	"github.com/stretchr/testify/require"
+
+	"github.com/northes/go-moonshot"
 )
 
 func TestNewChatCompletionsBuilder(t *testing.T) {
@@ -21,7 +22,7 @@ func TestNewChatCompletionsBuilder(t *testing.T) {
 		functionName2    = "function2"
 	)
 
-	wantedReq := &moonshot.ChatCompletionsRequest{
+	var wantedReq = &moonshot.ChatCompletionsRequest{
 		Messages: []*moonshot.ChatCompletionsMessage{
 			{
 				Role:    moonshot.RoleContextCache,
@@ -51,8 +52,11 @@ func TestNewChatCompletionsBuilder(t *testing.T) {
 		N:                1,
 		PresencePenalty:  1.2,
 		FrequencyPenalty: 1.5,
-		Stop:             []string{"结束"},
-		Stream:           true,
+		ResponseFormat: &moonshot.ChatCompletionsRequestResponseFormat{
+			Type: moonshot.ChatCompletionsResponseFormatJSONObject,
+		},
+		Stop:   []string{"结束"},
+		Stream: true,
 		Tools: []*moonshot.ChatCompletionsTool{{
 			Type: moonshot.ChatCompletionsToolTypeFunction,
 			Function: &moonshot.ChatCompletionsToolFunction{
@@ -91,6 +95,7 @@ func TestNewChatCompletionsBuilder(t *testing.T) {
 		SetN(1).
 		SetPresencePenalty(1.2).
 		SetFrequencyPenalty(1.5).
+		SetResponseFormat(moonshot.ChatCompletionsResponseFormatJSONObject).
 		SetStop([]string{"结束"}).
 		SetStream(true).
 		SetTool(&moonshot.ChatCompletionsTool{
@@ -125,5 +130,8 @@ func TestNewChatCompletionsBuilder(t *testing.T) {
 	tt.Equal(wantedReq, builder2.ToRequest())
 
 	builder2.SetPresencePenalty(2)
+	tt.NotEqual(wantedReq, builder2.ToRequest())
+
+	builder2.SetResponseFormat(moonshot.ChatCompletionsResponseFormatText)
 	tt.NotEqual(wantedReq, builder2.ToRequest())
 }

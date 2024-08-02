@@ -39,18 +39,23 @@ type ChatCompletionsMessage struct {
 }
 
 type ChatCompletionsRequest struct {
-	Messages         []*ChatCompletionsMessage `json:"messages"`
-	Model            ChatCompletionsModelID    `json:"model"`
-	MaxTokens        int                       `json:"max_tokens"`
-	Temperature      float64                   `json:"temperature"`
-	TopP             float64                   `json:"top_p"`
-	N                int                       `json:"n"`
-	PresencePenalty  float64                   `json:"presence_penalty"`
-	FrequencyPenalty float64                   `json:"frequency_penalty"`
-	Stop             []string                  `json:"stop"`
-	Stream           bool                      `json:"stream"`
+	Messages         []*ChatCompletionsMessage             `json:"messages"`
+	Model            ChatCompletionsModelID                `json:"model"`
+	MaxTokens        int                                   `json:"max_tokens"`
+	Temperature      float64                               `json:"temperature"`
+	TopP             float64                               `json:"top_p"`
+	N                int                                   `json:"n"`
+	PresencePenalty  float64                               `json:"presence_penalty"`
+	FrequencyPenalty float64                               `json:"frequency_penalty"`
+	ResponseFormat   *ChatCompletionsRequestResponseFormat `json:"response_format"`
+	Stop             []string                              `json:"stop"`
+	Stream           bool                                  `json:"stream"`
 	// When you use a tool, you need to define it
 	Tools []*ChatCompletionsTool `json:"tools,omitempty"`
+}
+
+type ChatCompletionsRequestResponseFormat struct {
+	Type ChatCompletionsResponseFormatType `json:"type"`
 }
 
 type ChatCompletionsResponse struct {
@@ -162,7 +167,7 @@ func (c *ChatCompletionsStreamResponse) Receive() <-chan *ChatCompletionsStreamR
 		for {
 			line, err := reader.ReadBytes('\n')
 			rr := ChatCompletionsStreamResponseReceive{}
-			//slog.Debug("next line", string(line))
+			// slog.Debug("next line", string(line))
 			if err != nil {
 				if err == io.EOF {
 					c.sendWithFinish(receiveCh)
@@ -175,7 +180,7 @@ func (c *ChatCompletionsStreamResponse) Receive() <-chan *ChatCompletionsStreamR
 			prefix := []byte("data: ")
 
 			if !bytes.HasPrefix(line, prefix) {
-				//slog.Debug("no hava prefix,continue", slog.String("line", string(line)))
+				// slog.Debug("no hava prefix,continue", slog.String("line", string(line)))
 				continue
 			}
 

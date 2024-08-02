@@ -3,8 +3,9 @@ package moonshot_test
 import (
 	"testing"
 
-	"github.com/northes/go-moonshot"
 	"github.com/stretchr/testify/require"
+
+	"github.com/northes/go-moonshot"
 )
 
 func TestEnumChatCompletions(t *testing.T) {
@@ -25,4 +26,7 @@ func TestEnumChatCompletions(t *testing.T) {
 	tt.EqualValues(moonshot.ChatCompletionsToolTypeFunction, moonshot.ChatCompletionsToolTypeFunction.String())
 
 	tt.EqualValues(moonshot.ChatCompletionsParametersTypeObject, moonshot.ChatCompletionsParametersTypeObject.String())
+
+	tt.EqualValues(moonshot.ChatCompletionsResponseFormatJSONObject, moonshot.ChatCompletionsResponseFormatJSONObject.String())
+	tt.EqualValues(moonshot.ChatCompletionsResponseFormatText, moonshot.ChatCompletionsResponseFormatText.String())
 }
