@@ -19,6 +19,7 @@ func TestEnumChatCompletions(t *testing.T) {
 	tt.EqualValues(moonshot.ModelMoonshotV18K, moonshot.ModelMoonshotV18K.String())
 	tt.EqualValues(moonshot.ModelMoonshotV132K, moonshot.ModelMoonshotV132K.String())
 	tt.EqualValues(moonshot.ModelMoonshotV1128K, moonshot.ModelMoonshotV1128K.String())
+	tt.EqualValues(moonshot.ModelMoonshotV1Auto, moonshot.ModelMoonshotV1Auto.String())
 
 	tt.EqualValues(moonshot.FinishReasonStop, moonshot.FinishReasonStop.String())
 	tt.EqualValues(moonshot.FinishReasonLength, moonshot.FinishReasonLength.String())
