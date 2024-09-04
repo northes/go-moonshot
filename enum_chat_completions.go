@@ -17,6 +17,7 @@ func (c ChatCompletionsMessageRole) String() string {
 type ChatCompletionsModelID string
 
 const (
+	ModelMoonshotV1Auto ChatCompletionsModelID = "moonshot-v1-auto"
 	ModelMoonshotV18K   ChatCompletionsModelID = "moonshot-v1-8k"
 	ModelMoonshotV132K  ChatCompletionsModelID = "moonshot-v1-32k"
 	ModelMoonshotV1128K ChatCompletionsModelID = "moonshot-v1-128k"

@@ -50,7 +50,7 @@ func (c *chatCompletionsBuilder) preCheck() {
 		c.req.Messages = make([]*ChatCompletionsMessage, 0)
 	}
 	if c.req.Model == "" {
-		c.req.Model = ModelMoonshotV18K
+		c.req.Model = ModelMoonshotV1Auto
 	}
 }
 
