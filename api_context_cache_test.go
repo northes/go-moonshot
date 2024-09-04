@@ -2,7 +2,6 @@ package moonshot_test
 
 import (
 	"context"
-	"os"
 	"testing"
 	"time"
 
@@ -17,7 +16,7 @@ import (
 // https://github.com/MoonshotAI/moonpalace
 
 func TestContextCache(t *testing.T) {
-	if isGithubActions() {
+	if test.IsGithubActions() {
 		return
 	}
 	cli, err := NewTestClient()
@@ -93,7 +92,7 @@ func TestContextCache(t *testing.T) {
 }
 
 func TestContextCache_Create(t *testing.T) {
-	if isGithubActions() {
+	if test.IsGithubActions() {
 		return
 	}
 	cli, err := NewTestClient()
@@ -124,7 +123,7 @@ func TestContextCache_Create(t *testing.T) {
 }
 
 func TestContextCache_Delete(t *testing.T) {
-	if isGithubActions() {
+	if test.IsGithubActions() {
 		return
 	}
 	cli, err := NewTestClient()
@@ -144,7 +143,7 @@ func TestContextCache_Delete(t *testing.T) {
 }
 
 func TestContextCache_List(t *testing.T) {
-	if isGithubActions() {
+	if test.IsGithubActions() {
 		return
 	}
 	cli, err := NewTestClient()
@@ -162,7 +161,7 @@ func TestContextCache_List(t *testing.T) {
 }
 
 func TestContextCache_CreateTag(t *testing.T) {
-	if isGithubActions() {
+	if test.IsGithubActions() {
 		return
 	}
 	cli, err := NewTestClient()
@@ -181,11 +180,4 @@ func TestContextCache_CreateTag(t *testing.T) {
 		t.Fatal(err)
 	}
 	assert.Equal(t, "MyCacheTag", createResponse.Tag)
-}
-
-func isGithubActions() bool {
-	if val, ok := os.LookupEnv("GITHUB_ACTIONS"); !ok || val != "true" {
-		return false
-	}
-	return true
 }

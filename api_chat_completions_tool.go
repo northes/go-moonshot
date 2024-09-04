@@ -7,8 +7,8 @@ type ChatCompletionsTool struct {
 
 type ChatCompletionsToolFunction struct {
 	Name        string                                 `json:"name"`
-	Description string                                 `json:"description"`
-	Parameters  *ChatCompletionsToolFunctionParameters `json:"parameters"`
+	Description string                                 `json:"description,omitempty"`
+	Parameters  *ChatCompletionsToolFunctionParameters `json:"parameters,omitempty"`
 }
 
 type ChatCompletionsToolFunctionParameters struct {
@@ -33,4 +33,13 @@ type ChatCompletionsResponseToolCalls struct {
 type ChatCompletionsResponseToolCallsFunction struct {
 	Name      string `json:"name"`
 	Arguments string `json:"arguments"`
+}
+
+type ChatCompletionsToolBuiltinFunctionWebSearchArguments struct {
+	SearchResult struct {
+		SearchId string `json:"search_id"`
+	} `json:"search_result"`
+	Usage struct {
+		TotalTokens int `json:"total_tokens"`
+	} `json:"usage"`
 }

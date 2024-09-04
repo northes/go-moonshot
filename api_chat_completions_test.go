@@ -9,10 +9,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/northes/go-moonshot"
 	"github.com/northes/go-moonshot/internal/httpx"
 	"github.com/northes/go-moonshot/test"
-	"github.com/stretchr/testify/require"
 )
 
 func TestChat(t *testing.T) {
@@ -179,24 +180,20 @@ func TestUseTools(t *testing.T) {
 	// check tool calls
 	if len(resp.Choices) != 0 {
 		if resp.Choices[0].FinishReason == moonshot.FinishReasonToolCalls {
-			for _, toolCall := range resp.Choices[0].Message.ToolCalls {
-				t.Logf("should tool calls: %v", test.MarshalJsonToStringX(toolCall))
-				if strings.HasPrefix(toolCall.ID, functionName) {
+			for _, tool := range resp.Choices[0].Message.ToolCalls {
+				t.Logf("should tool calls: %v", test.MarshalJsonToStringX(tool))
+				if strings.HasPrefix(tool.ID, functionName) {
 					// tool calls
 					ipInfo, err := IPLocate(ip)
-					if err != nil {
-						t.Fatal(err)
-					}
-					b, err := json.Marshal(ipInfo)
 					if err != nil {
 						t.Fatal(err)
 					}
 
 					builder.AddMessageFromChoices(resp.Choices)
 
-					t.Logf("tool calls result: %s", test.MarshalJsonToStringX(ipInfo))
+					t.Logf("tool calls result: %s", ipInfo)
 
-					builder.AddToolContent(string(b), functionName, resp.Choices[0].Message.ToolCalls[0].ID)
+					builder.AddToolContent(ipInfo, functionName, tool.ID)
 				}
 			}
 		}
@@ -231,17 +228,77 @@ type IPLocateInfoResponse struct {
 	Data *IPLocateInfo `json:"data"`
 }
 
-func IPLocate(ip string) (*IPLocateInfo, error) {
+func IPLocate(ip string) (string, error) {
 	response, err := httpx.NewClient(fmt.Sprintf("https://apihut.co/ip/%s", ip)).Get(context.Background())
 	if err != nil {
-		return nil, err
+		return "", err
 	}
+	defer func() {
+		_ = response.Raw().Body.Close()
+	}()
 
-	respData := new(IPLocateInfoResponse)
-	err = response.Unmarshal(respData)
+	body, err := io.ReadAll(response.Raw().Body)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return respData.Data, nil
+	return string(body), nil
+}
+
+func TestBuiltinFunctionWebSearch(t *testing.T) {
+	if test.IsGithubActions() {
+		return
+	}
+
+	cli, err := NewTestClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+
+	builder := moonshot.NewChatCompletionsBuilder()
+	builder.SetModel(moonshot.ModelMoonshotV1128K)
+	builder.AddUserContent("请搜索 Moonshot AI Context Caching 技术，并告诉我它是什么。")
+	builder.SetTool(&moonshot.ChatCompletionsTool{
+		Type: moonshot.ChatCompletionsToolTypeBuiltinFunction,
+		Function: &moonshot.ChatCompletionsToolFunction{
+			Name: moonshot.BuiltinFunctionWebSearch,
+		},
+	})
+
+	resp, err := cli.Chat().Completions(ctx, builder.ToRequest())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(resp.Choices) != 0 {
+		choice := resp.Choices[0]
+		if choice.FinishReason == moonshot.FinishReasonToolCalls {
+			for _, tool := range choice.Message.ToolCalls {
+				t.Logf("tool calls: %v", test.MarshalJsonToStringX(tool))
+				if tool.Function.Name == moonshot.BuiltinFunctionWebSearch {
+					// web search
+					arguments := new(moonshot.ChatCompletionsToolBuiltinFunctionWebSearchArguments)
+					if err = json.Unmarshal([]byte(tool.Function.Arguments), arguments); err != nil {
+						t.Errorf("unmarshal tool arguments error: %v", err)
+						continue
+					}
+
+					t.Logf("tool calls result: search_id: %s, total_tokens: %d", arguments.SearchResult.SearchId, arguments.Usage.TotalTokens)
+
+					builder.AddMessageFromChoices(resp.Choices)
+					builder.AddToolContent(tool.Function.Arguments, tool.Function.Name, tool.ID)
+				}
+			}
+		}
+	}
+
+	t.Logf("builder: %v", test.MarshalJsonToStringX(builder.ToRequest()))
+
+	resp, err = cli.Chat().Completions(ctx, builder.ToRequest())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(test.MarshalJsonToStringX(resp))
 }

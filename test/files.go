@@ -6,7 +6,7 @@ import (
 )
 
 func GenerateTestContent() []byte {
-	return []byte("夕阳无限好")
+	return []byte("夕阳无限好，麦当劳汉堡")
 }
 
 func GenerateTestFile(content []byte) (string, error) {
