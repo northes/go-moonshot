@@ -19,7 +19,7 @@ by [MoonshotAI](https://moonshot.cn).
 ## 🚀 Installation
 
 ```bash
-go get github.com/northes/go-moonshot@v0.5.1
+go get github.com/northes/go-moonshot@v0.5.2
 ```
 
 You can find the docs at [go docs](https://pkg.go.dev/github.com/northes/go-moonshot).
@@ -27,8 +27,9 @@ You can find the docs at [go docs](https://pkg.go.dev/github.com/northes/go-moon
 ## 🤘 Feature
 
 - Easy to use and simple API, chain operation.
-- Full API support.
+- Full API and builtin functions support.
 - Predefined enumeration.
+- Messages builder.
 
 ##  📄 Supported API
 
@@ -47,7 +48,13 @@ You can find the docs at [go docs](https://pkg.go.dev/github.com/northes/go-moon
 | Tool Use                | ✅    |
 | Context Cache           | ✅    |
 
+## 🗜 Builtin Functions
+
+- `$web_search`
+
 ## 🥪 Usage
+
+For more examples, you can view the test file of the corresponding interface.
 
 ### Initialize client
 
@@ -61,23 +68,17 @@ You can find the docs at [go docs](https://pkg.go.dev/github.com/northes/go-moon
 
 ```go
 key, ok := os.LookupEnv("MOONSHOT_KEY")
-if !ok {
-    return errors.New("missing environment variable: moonshot_key")
-}
+// do something...
 
 cli, err := moonshot.NewClient(key)
-if err != nil {
-    return err
-}
+// do something...
 ```
 
 #### With Config
 
 ```go
 key, ok := os.LookupEnv("MOONSHOT_KEY")
-if !ok {
-    return errors.New("missing environment variable: moonshot_key")
-}
+// do something...
 
 cli, err := moonshot.NewClientWithConfig(
     moonshot.NewConfig(
@@ -92,9 +93,7 @@ cli, err := moonshot.NewClientWithConfig(
 
 ```go
 resp, err := cli.Models().List(context.Background())
-if err != nil {
-    return err
-}
+// do something...
 ```
 
 #### Chat Completions
@@ -106,10 +105,7 @@ builder.AppendPrompt("你是 Kimi，由 Moonshot AI 提供的人工智能助手�
 	AppendUser("你好，我叫李雷，1+1等于多少？").
 	WithTemperature(0.3)
 
-resp, err := cli.Chat().Completions(ctx, builder.ToRequest())
-if err != nil {
-    return err
-}
+resp, err := cli.Chat().Completions(ctx, builder.ToRequest()) 
 // {"id":"cmpl-eb8e8474fbae4e42bea9f6bbf38d56ed","object":"chat.completion","created":2647921,"model":"moonshot-v1-8k","choices":[{"index":0,"message":{"role":"assistant","content":"你好，李雷！1+1等于2。这是一个基本的数学加法运算。如果你有任何其他问题或需要帮助，请随时告诉我。"},"finish_reason":"stop"}],"usage":{"prompt_tokens":87,"completion_tokens":31,"total_tokens":118}}
 
 // do something...
@@ -122,10 +118,9 @@ for _, choice := range resp.Choices {
 builder.AppendUser("在这个基础上再加3等于多少")
 
 resp, err := cli.Chat().Completions(ctx, builder.ToRequest())
-if err != nil {
-    return err
-}
 // {"id":"cmpl-a7b938eaddc04fbf85fe578a980040ac","object":"chat.completion","created":5455796,"model":"moonshot-v1-8k","choices":[{"index":0,"message":{"role":"assistant","content":"在这个基础上，即1+1=2的结果上再加3，等于5。所以，2+3=5。"},"finish_reason":"stop"}],"usage":{"prompt_tokens":131,"completion_tokens":26,"total_tokens":157}}
+
+// do something...
 ```
 
 #### Chat completions with stream
@@ -143,9 +138,7 @@ resp, err := cli.Chat().CompletionsStream(context.Background(), &moonshot.ChatCo
     Temperature: 0.3,
     Stream:      true,
 })
-if err != nil {
-    return err
-}
+// do something...
 
 for receive := range resp.Receive() {
     msg, err := receive.GetMessage()
@@ -162,6 +155,45 @@ for receive := range resp.Receive() {
         // do something...
     }
 }
+```
+
+#### Web search tool
+
+```go
+builder := moonshot.NewChatCompletionsBuilder()
+builder.SetModel(moonshot.ModelMoonshotV1128K)
+builder.AddUserContent("请搜索 Moonshot AI Context Caching 技术，并告诉我它是什么。")
+builder.SetTool(&moonshot.ChatCompletionsTool{
+	Type: moonshot.ChatCompletionsToolTypeBuiltinFunction,
+	Function: &moonshot.ChatCompletionsToolFunction{
+		Name: moonshot.BuiltinFunctionWebSearch,
+	},
+})
+
+resp, err := cli.Chat().Completions(ctx, builder.ToRequest())
+// do something...
+
+if len(resp.Choices) != 0 {
+	choice := resp.Choices[0]
+	if choice.FinishReason == moonshot.FinishReasonToolCalls {
+		for _, tool := range choice.Message.ToolCalls {
+			if tool.Function.Name == moonshot.BuiltinFunctionWebSearch {
+				// web search
+				arguments := new(moonshot.ChatCompletionsToolBuiltinFunctionWebSearchArguments)
+				if err = json.Unmarshal([]byte(tool.Function.Arguments), arguments); err != nil {
+					continue
+				}
+				// do something...
+
+				builder.AddMessageFromChoices(resp.Choices)
+				builder.AddToolContent(tool.Function.Arguments, tool.Function.Name, tool.ID)
+			}
+		}
+	}
+}
+
+resp, err = cli.Chat().Completions(ctx, builder.ToRequest())
+// do something...
 ```
 
 ## 🤝  Missing a Feature?
