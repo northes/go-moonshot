@@ -52,7 +52,8 @@ func (c ChatCompletionsFinishReason) String() string {
 type ChatCompletionsToolType string
 
 const (
-	ChatCompletionsToolTypeFunction ChatCompletionsToolType = "function"
+	ChatCompletionsToolTypeFunction        ChatCompletionsToolType = "function"
+	ChatCompletionsToolTypeBuiltinFunction ChatCompletionsToolType = "builtin_function"
 )
 
 func (c ChatCompletionsToolType) String() string {
