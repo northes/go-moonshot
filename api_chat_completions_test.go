@@ -213,21 +213,6 @@ func TestUseTools(t *testing.T) {
 	// IP地址`15.202.141.157`的定位结果显示，该IP地址位于美国华盛顿州，属于Amazon.com。具体的城市信息没有提供，但经纬度坐标为(-95.71289, 37.090245)。这些信息来源于高德地图，最后更新时间为2024年6月6日。
 }
 
-type IPLocateInfo struct {
-	IP        string `json:"ip"`
-	Country   string `json:"country"`
-	Province  string `json:"province"`
-	City      string `json:"city"`
-	District  string `json:"district"`
-	ISP       string `json:"isp"`
-	Location  string `json:"location"`
-	Source    string `json:"source"`
-	CacheTime string `json:"cache_time"`
-}
-type IPLocateInfoResponse struct {
-	Data *IPLocateInfo `json:"data"`
-}
-
 func IPLocate(ip string) (string, error) {
 	response, err := httpx.NewClient(fmt.Sprintf("https://apihut.co/ip/%s", ip)).Get(context.Background())
 	if err != nil {

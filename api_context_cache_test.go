@@ -28,7 +28,7 @@ func TestContextCache(t *testing.T) {
 	// Create
 	var createResponse *moonshot.ContextCacheCreateResponse
 	createResponse, err = cli.ContextCache().Create(ctx, &moonshot.ContextCacheCreateRequest{
-		Model: "moonshot-v1",
+		Model: moonshot.ModelFamilyMoonshotV1,
 		Messages: []moonshot.ChatCompletionsMessage{
 			{
 				Role:    moonshot.RoleSystem,
@@ -102,7 +102,7 @@ func TestContextCache_Create(t *testing.T) {
 	ctx := context.Background()
 
 	response, err := cli.ContextCache().Create(ctx, &moonshot.ContextCacheCreateRequest{
-		Model: "moonshot-v1",
+		Model: moonshot.ModelFamilyMoonshotV1,
 		Messages: []moonshot.ChatCompletionsMessage{
 			{
 				Role:    moonshot.RoleSystem,
